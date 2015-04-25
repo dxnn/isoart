@@ -3,6 +3,10 @@
 <title>Art Makes Programs</title>
 <style></style>
 </head><body>
+  
+<div id="left"></div>
+
+<div id="right"></div>
 
 <script>
   
@@ -17,8 +21,12 @@
     pc = -1
     stack  = []
     rstack = []
+    resize(memory, 256)
     codes = compile(program) // OPT
-    while(step(pc++) !== false) {}
+    el = document.getElementById('left')
+    while(step(pc++) !== false) {
+      draw(memory, el)
+    }
     console.log(memory, stack)
   }
   
@@ -63,6 +71,69 @@
     if(addr >= memory.length) addr = memory.length - 1
     memory[addr] = (val | 0) % 255 // memory values are constrained
   }
+  
+  function resize(arr, size) {
+    if(arr.length > size) 
+      return arr.splice(size, arr.length)
+    
+    for(var i = arr.length; i < size; i++)
+      arr.push(0)
+  }
+  
+  // COMPILER
+  
+  function word_to_code(word) {
+    var index = dict_keys.indexOf(word)
+    if(index == -1) return false
+    return index
+  }
+  
+  function code_to_word(code) {
+    var index = code - magic_offset
+    if(index < 0 || index > dict_keys.length) return false
+    return dict_keys[index]
+  }
+  
+  function compile(program) {
+    return program.map(function(word) {
+      if(word == +word) return word
+      var maybe_code = word_to_code(word)
+      if(maybe_code === false) return 0
+      return maybe_code + magic_offset
+    })
+  }
+  
+  function decompile(bytecode) {
+    return bytecode.map(function(code) {
+      var maybe_word = code_to_word(code)
+      if(maybe_word === false) return code
+      return maybe_word
+    })
+  }
+  
+  
+  // RENDERER
+  
+  function draw(arr, el) { // html cause whatevs
+    if(arr.length != 256) 
+      return console.error('YARG!')
+    
+    var html = '<table>'
+    
+    for(var y = 0; y < 16; y++) {
+      html += '<tr>'
+      for(var x = 0; x < 16; x++) {
+        var index = x + y * 16
+        var value = arr[index]
+        html += '<td style="width:20px; height:20px; background-color: hsl(' + value + ', 70%, 80%)">' + value + '</td>'
+      }
+      html += '</tr>'
+    }
+    
+    html += '</table>'
+    el.innerHTML = html
+  }
+  
   
   // DICTIONARY
   
@@ -120,35 +191,6 @@
   var magic_offset = 100
   var dict_keys = Object.keys(dict)
   
-  function word_to_code(word) {
-    var index = dict_keys.indexOf(word)
-    if(index == -1) return false
-    return index
-  }
-  
-  function code_to_word(code) {
-    var index = code - magic_offset
-    if(index < 0 || index > dict_keys.length) return false
-    return dict_keys[index]
-  }
-  
-  function compile(program) {
-    return program.map(function(word) {
-      if(word == +word) return word
-      var maybe_code = word_to_code(word)
-      if(maybe_code === false) return 0
-      return maybe_code + magic_offset
-    })
-  }
-  
-  function decompile(bytecode) {
-    return bytecode.map(function(code) {
-      var maybe_word = code_to_word(code)
-      if(maybe_word === false) return code
-      return maybe_word
-    })
-  }
-  
   
   // TESTS
   
@@ -169,17 +211,19 @@
             , 'exit']             // return from sub
 
   run(program)
-  if(JSON.stringify(memory) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
+  if(JSON.stringify(memory.slice(0, 11)) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
   if(JSON.stringify(stack)  != '[]') console.error('YO!')
   
   if(JSON.stringify(compile(program)) != JSON.stringify(compile(compile(program)))) console.error('WOW!')
   
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
-    
+  
+
+  
   /* 
     next steps:
-    - fix step() to eat codes
-    - fix memory size before running
+    -- fix step() to eat codes
+    -- fix memory size before running
     - visualize program execution
     - visualize memory 
     - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)

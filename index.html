@@ -131,10 +131,6 @@
     }
   }
   
-  function clone(arr) {
-    return JSON.parse(JSON.stringify(arr))
-  }
-  
   function randfill(size) {
     var arr = []
     for(var i = 0; i < size; i++)
@@ -369,7 +365,7 @@
     
     index = index % 2 // more fun
     
-    var triple = [pc, index, addr]
+    var triple = [pc||0, index||0, addr||0]             // ugh NaNs whyyyyyyyy?
     rstack.push(triple)
     push(index)
     
@@ -380,9 +376,9 @@
     if(!rstack.length) return false                     // stop execution
     
     var triple = rstack.pop()
-    var return_addr   = triple[0] || 0
-    var current_index = triple[1] || 0
-    var self_addr     = triple[2] || 0
+    var return_addr   = triple[0] || 0                  // NaNNaNNaNNaNNaNNaN
+    var current_index = triple[1] || 0                  // NaNNaNNaNNaNNaNNaN
+    var self_addr     = triple[2] || 0                  // BatNaN
       
     if(current_index < 1) { // THINK: -1 ?
       pc = return_addr                                  // all done!
@@ -422,14 +418,12 @@
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
   
   
-  var old_memory = clone(memory)
   rando(function looper() {
-    var repeat = JSON.stringify(old_memory) == JSON.stringify(memory)
-    old_memory = clone(memory)
+    var repeat = JSON.stringify(program) == JSON.stringify(memory)
     if(repeat)
-      rando(looper)
-    else
       slowrun(memory, looper)
+    else
+      rando(looper)
   })
   
   

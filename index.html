@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<title>Art Makes Programs</title>
+<style></style>
+</head><body>
+
+<script>
+  
+  var  stack  = []                                      // parameter stack
+  var rstack  = []                                      // return stack
+  var memory  = []                                      // TODO: make this a byte array
+  
+  var codes   = []                                      // TODO: make this a byte array
+  var pc      = 0                                       // program counter
+  
+  function run(program) {
+    codes = program
+    while(step()) {}
+    console.log(memory)
+  }
+  
+  function run() {
+    
+  }
+  
+  var dict = {
+    
+  }
+  
+</script>
+</body></html>

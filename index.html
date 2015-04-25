@@ -62,6 +62,54 @@
     window.requestAnimationFrame(loop)
   }
   
+  function rando() {
+    // var old_dict = dict
+    // dict = fix_dict()
+    fix_dict()
+    memory  = randfill(256)
+    program = randfill(256)
+    slowrun(program)
+    // dict = old_dict
+  }
+  
+  function fix_dict() {
+    // var new_dict = JSON.parse(JSON.stringify(dict))
+
+    dict['M>1'] = dict['M>']
+    dict['M>2'] = dict['M>']
+    dict['M>3'] = dict['M>']
+    dict['M>4'] = dict['M>']
+    dict['M>5'] = dict['M>']
+    dict['M>6'] = dict['M>']
+    dict['M>7'] = dict['M>']
+    dict['M>8'] = dict['M>']
+    dict['M>9'] = dict['M>']
+    dict['M>a1'] = dict['M>']
+    dict['M>a2'] = dict['M>']
+    dict['M>a3'] = dict['M>']
+    dict['M>a4'] = dict['M>']
+    dict['M>a5'] = dict['M>']
+    dict['M>a6'] = dict['M>']
+    dict['M>a7'] = dict['M>']
+    dict['M>a8'] = dict['M>']
+    dict['M>a9'] = dict['M>']
+
+    dict['jump1'] = dict['jump']
+    dict['jump2'] = dict['jump']
+    dict['jump3'] = dict['jump']
+    
+    dict_keys = Object.keys(dict)
+    return dict
+    // return new_dict
+  }
+  
+  function randfill(size) {
+    var arr = []
+    for(var i = 0; i < size; i++)
+      arr.push(Math.floor(Math.random()*256))
+    return arr
+  }
+  
   function step() {
     var code = codes[pc]
     if(code == null) return false
@@ -124,8 +172,10 @@
   }
   
   function code_to_word(code) {
-    var index = code - magic_offset
-    if(index < 0 || index > dict_keys.length) return false
+    var numkeys = dict_keys.length
+    var size = magic_offset + numkeys
+    var index = (code % size) - magic_offset
+    if(index < 0) return false
     return dict_keys[index]
   }
   
@@ -247,11 +297,13 @@
   dict['dup'] = function() {push(stack[stack.length-1])} // TODO: remove this later
 
   dict['jump'] = function() {
-    var index = pop()    
+    var index = pop()
     var how_far = pop()
     
     var addr = scan_to_sub(how_far)
     if(!addr) return dict['exit']()                     // YOLO
+    
+    index = index % 8 // more fun
     
     var triple = [pc, index, addr]
     rstack.push(triple)
@@ -278,7 +330,7 @@
     }
   }
   
-  var magic_offset = 100
+  var magic_offset = 10
   var dict_keys = Object.keys(dict)
   
   
@@ -316,7 +368,7 @@
     -- fix memory size before running
     -- visualize memory 
     -- step using window.requestAnimationFrame
-    - visualize program execution
+    -- visualize program execution
     - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)
     - iterate program: (F(F))(F(F)) etc. e.g. F = F(F)
     - wrap subroutines nicely

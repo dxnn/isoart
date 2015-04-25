@@ -4,30 +4,48 @@
 <style></style>
 </head><body>
   
-<div id="left"></div>
+<div id="left" style="float:left; margin-right:100px"></div>
 
-<div id="right"></div>
+<div id="right" style="float:left"></div>
 
 <script>
   
   var  stack  = []                                      // parameter stack
   var rstack  = []                                      // return stack
-  var memory  = [] // TODO: make this a byte array
+  var memory  = []                                      // TODO: make this a byte array
   
-  var codes   = [] // TODO: make this a byte array
-  var pc      = -1                                       // program counter
+  var codes   = []                                      // TODO: make this a byte array
+  var pc      = -1                                      // program counter
+  var vdom    = {}                                      // virtual dom
   
-  function run(program) {
+  left = document.getElementById('left')
+  right = document.getElementById('right')
+  
+  function reset() {
     pc = -1
     stack  = []
     rstack = []
-    resize(memory, 256)
+    memory = resize(memory, 256)
+  }
+  
+  function run(program) {
+    reset()
     codes = compile(program) // OPT
-    el = document.getElementById('left')
-    while(step(pc++) !== false) {
-      draw(memory, el)
+    while(step(pc++) !== false) {}
+  }
+  
+  function slowrun(program) {
+    reset()
+    codes = compile(program) // OPT
+    
+    function loop() {
+      draw(memory, right)
+      draw(codes, left)
+      
+      if(step(pc++) !== false)
+        window.requestAnimationFrame(loop)
     }
-    console.log(memory, stack)
+    window.requestAnimationFrame(loop)
   }
   
   function step() {
@@ -74,10 +92,13 @@
   
   function resize(arr, size) {
     if(arr.length > size) 
-      return arr.splice(size, arr.length)
+      return arr.slice(0, size)
     
+    arr = arr.slice()
     for(var i = arr.length; i < size; i++)
       arr.push(0)
+
+    return arr
   }
   
   // COMPILER
@@ -114,9 +135,9 @@
   
   // RENDERER
   
-  function draw(arr, el) { // html cause whatevs
+  function draw(arr, el) {
     if(arr.length != 256) 
-      return console.error('YARG!')
+      arr = resize(arr, 256)
     
     var html = '<table>'
     
@@ -125,7 +146,7 @@
       for(var x = 0; x < 16; x++) {
         var index = x + y * 16
         var value = arr[index]
-        html += '<td style="width:20px; height:20px; background-color: hsl(' + value + ', 70%, 80%)">' + value + '</td>'
+        html += '<td style="width:20px; height:20px; background-color: hsl(' + (value?value:300) + ', 70%, 80%)">' + value + '</td>'
       }
       html += '</tr>'
     }
@@ -224,8 +245,9 @@
     next steps:
     -- fix step() to eat codes
     -- fix memory size before running
+    -- visualize memory 
+    -- step using window.requestAnimationFrame
     - visualize program execution
-    - visualize memory 
     - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)
     - iterate program: (F(F))(F(F)) etc. e.g. F = F(F)
     - wrap subroutines nicely

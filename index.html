@@ -1,13 +1,17 @@
 <!doctype html>
 <html><head><meta charset="utf-8" />
 <title>Art Makes Programs</title>
-<style></style>
+<style>
+  .box {
+    height: 30px;
+    width: 30px;
+    position: absolute;
+  }
+</style>
 </head><body>
   
-<div id="left" style="float:left; margin-right:100px"></div>
-
-<div id="right" style="float:left"></div>
-
+  <div id="bottom"></div>
+  
 <script>
   
   var  stack  = []                                      // parameter stack
@@ -17,9 +21,8 @@
   var codes   = []                                      // TODO: make this a byte array
   var pc      = -1                                      // program counter
   var vdom    = {}                                      // virtual dom
-  
-  left = document.getElementById('left')
-  right = document.getElementById('right')
+
+  var bottom  = document.getElementById('bottom')       // divs are appended above this
   
   function reset() {
     pc = -1
@@ -37,10 +40,11 @@
   function slowrun(program) {
     reset()
     codes = compile(program) // OPT
+    codes = resize(codes, 256)
     
     function loop() {
-      draw(memory, right)
-      draw(codes, left)
+      draw_memory(memory)
+      draw_codes(codes)
       
       if(step(pc++) !== false)
         window.requestAnimationFrame(loop)
@@ -135,24 +139,67 @@
   
   // RENDERER
   
-  function draw(arr, el) {
-    if(arr.length != 256) 
-      arr = resize(arr, 256)
+  function draw_memory(arr) {
+    var nick = 'memory'
+    var hoff = 500
+    var voff = 0
+    var wrap = 16
+    var width = 30
+    var height = 30
     
-    var html = '<table>'
+    for(var i = 0; i < arr.length; i++) {
+      var x = width * (i % wrap) + hoff
+      var y = height * (Math.floor(i/wrap)) + voff
+      var color = arr[i]
+      draw(color, x, y, i + nick)
+    }
+  }
+  
+  function draw_codes(arr) {
+    var nick = 'codes'
+    var hoff = 0
+    var voff = 0
+    var wrap = 16
+    var width = 30
+    var height = 30
     
-    for(var y = 0; y < 16; y++) {
-      html += '<tr>'
-      for(var x = 0; x < 16; x++) {
-        var index = x + y * 16
-        var value = arr[index]
-        html += '<td style="width:20px; height:20px; background-color: hsl(' + (value?value:300) + ', 70%, 80%)">' + value + '</td>'
-      }
-      html += '</tr>'
+    for(var i = 0; i < arr.length; i++) {
+      var x = width * (i % wrap) + hoff
+      var y = height * (Math.floor(i/wrap)) + voff
+      var color = arr[i]
+      draw(color, x, y, i + nick)
+    }
+  }
+  
+  function draw(color, x, y, name) {
+    var sat = 70
+    var lit = 80
+    
+    var cell = vdom[name]
+    
+    if(!cell) {
+      cell = {x: 'asdf', y: 'asdf', color: 'asdf'}
+      cell.el = document.createElement("div")
+      cell.el.classList.add('box')
+      document.body.insertBefore(cell.el, bottom); 
+      vdom[name] = cell
     }
     
-    html += '</table>'
-    el.innerHTML = html
+    if(cell.x != x) {
+      cell.x = x
+      cell.el.style.left = '' + x + 'px'
+    }
+    
+    if(cell.y != y) {
+      cell.y = y
+      cell.el.style.top = '' + y + 'px'
+    }
+    
+    if(cell.color != color) {
+      cell.color = color
+      var hsl = 'hsl('+ (color ? color : 300) +', '+ sat +'%, '+ lit +'%)'
+      cell.el.style.backgroundColor = hsl
+    }
   }
   
   

@@ -63,6 +63,8 @@
     memory[addr] = (val | 0) % 255 // memory values are constrained
   }
   
+  // DICTIONARY
+  
   var dict = {}
   dict['+']    = function() {var x = pop(); push((pop() + x) | 0)}
   dict['-']    = function() {var x = pop(); push((pop() - x) | 0)}
@@ -114,6 +116,39 @@
     }
   }
   
+  var magic_offset = 100
+  var dict_keys = Object.keys(dict)
+  
+  function word_to_code(word) {
+    var index = dict_keys.indexOf(word)
+    if(index == -1) return false
+    return index
+  }
+  
+  function code_to_word(code) {
+    var index = code - magic_offset
+    if(index < 0 || index > dict_keys.length) return false
+    return dict_keys[index]
+  }
+  
+  function compile(program) {
+    return program.map(function(word) {
+      if(word == +word) return word
+      var maybe_code = word_to_code(word)
+      if(maybe_code === false) return 0
+      return maybe_code + magic_offset
+    })
+  }
+  
+  function decompile(bytecode) {
+    return bytecode.map(function(code) {
+      var maybe_word = code_to_word(code)
+      if(maybe_word === false) return code
+      return maybe_word
+    })
+  }
+  
+  
   // TESTS
   
   run([1, 2, 3, 4, '+', '*', '+'])
@@ -135,6 +170,8 @@
   run(program)
   if(JSON.stringify(memory) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
   if(JSON.stringify(stack)  != '[]') console.error('YO!')
+  
+  if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
   
 </script>
 </body></html>

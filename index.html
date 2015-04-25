@@ -49,35 +49,55 @@
     stack.push( (val | 0) % 255)
   }
   
+  function pop() {
+    return stack.pop()
+  }
+  
   var dict = {}
-  dict['+']    = function() {var x = stack.pop(); push((stack.pop() + x) | 0)}
-  dict['-']    = function() {var x = stack.pop(); push((stack.pop() - x) | 0)}
-  dict['*']    = function() {var x = stack.pop(); push((stack.pop() * x) | 0)}
-  dict['/']    = function() {var x = stack.pop(); push((stack.pop() / x) | 0)}
+  dict['+']    = function() {var x = pop(); push((pop() + x) | 0)}
+  dict['-']    = function() {var x = pop(); push((pop() - x) | 0)}
+  dict['*']    = function() {var x = pop(); push((pop() * x) | 0)}
+  dict['/']    = function() {var x = pop(); push((pop() / x) | 0)}
   
-  dict['>M']   = function() {var addr = stack.pop(); var value = stack.pop(); memory[addr] = value}
-  dict['M>']   = function() {var addr = stack.pop(); push(memory[addr])}
+  dict['>M']   = function() {var addr = pop(); var value = pop(); memory[addr] = value}
+  dict['M>']   = function() {var addr = pop(); push(memory[addr])}
                  
-  dict['abs' ] = function() {push(Math.abs(stack.pop()))}
-  dict['max' ] = function() {push(Math.max(stack.pop(), stack.pop()))}
-  dict['min' ] = function() {push(Math.min(stack.pop(), stack.pop()))}
+  dict['abs' ] = function() {push(Math.abs(pop()))}
+  dict['max' ] = function() {push(Math.max(pop(), pop()))}
+  dict['min' ] = function() {push(Math.min(pop(), pop()))}
   
-  dict['drop'] = function() {stack.pop()}
-  dict['pick'] = function() {var p=stack.pop(); push(stack[stack.length-p-1])}
-  dict['roll'] = function() {var p=stack.pop(); var x=stack[stack.length-p-1]; stack.splice(stack.length-p-1, 1); push(x)}
+  dict['drop'] = function() {pop()}
+  dict['pick'] = function() {var p=pop(); push(stack[stack.length-p-1])}
+  dict['roll'] = function() {var p=pop(); var x=stack[stack.length-p-1]; stack.splice(stack.length-p-1, 1); push(x)}
 
   dict['jump'] = function() {
-    rstack.push(pc)
-    var how_far = stack.pop()
+    var index = pop()    
+    var how_far = pop()
+    
     var addr = scan_to_sub(how_far)
     if(!addr) return dict['exit']()                     // YOLO
+    
+    var triple = [pc, index, addr]
+    rstack.push(triple)
+    
     pc = addr
   } 
   
   dict['exit'] = function() {
     if(!rstack.length) return false                     // stop execution
-    var addr = rstack.pop()
-    pc = addr
+    
+    var triple = rstack.pop()
+    var return_addr   = triple[0]
+    var current_index = triple[1]
+    var self_addr     = triple[2]
+      
+    if(!current_index) { // THINK: -1 ?
+      pc = return_addr                                  // all done!
+    } else {
+      push(current_index)
+      rstack.push([return_addr, current_index-1, self_addr])
+      pc = self_addr
+    }
   }
   
   // TESTS

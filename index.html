@@ -33,6 +33,8 @@
   var highlight = document.getElementById('pc')         // divs are appended above this
   vdom['highlight'] = {el: highlight, color: 0}
   
+  var magic_offset = 10
+  
   function reset() {
     pc = -1
     stack  = []
@@ -46,7 +48,7 @@
     while(step(pc++) !== false) {}
   }
   
-  function slowrun(program) {
+  function slowrun(program, done) {
     reset()
     codes = compile(program) // OPT
     codes = resize(codes, 256)
@@ -58,17 +60,19 @@
       
       if(step(pc++) !== false)
         window.requestAnimationFrame(loop)
+      else
+        if(typeof done == 'function') done()
     }
     window.requestAnimationFrame(loop)
   }
   
-  function rando() {
+  function rando(done) {
     // var old_dict = dict
     // dict = fix_dict()
     fix_dict()
     memory  = randfill(256)
     program = randfill(256)
-    slowrun(program)
+    slowrun(program, done)
     // dict = old_dict
   }
   
@@ -98,9 +102,12 @@
     dict['jump2'] = dict['jump']
     dict['jump3'] = dict['jump']
     
-    dict_keys = Object.keys(dict)
     return dict
     // return new_dict
+  }
+  
+  function clone(arr) {
+    return JSON.parse(JSON.stringify(arr))
   }
   
   function randfill(size) {
@@ -135,7 +142,7 @@
   }
   
   function push(val) {
-    stack.push( +val )
+    stack.push( +val || 0 )
   }
   
   function pop() {
@@ -166,12 +173,14 @@
   // COMPILER
   
   function word_to_code(word) {
+    var dict_keys = Object.keys(dict)
     var index = dict_keys.indexOf(word)
     if(index == -1) return false
     return index
   }
   
   function code_to_word(code) {
+    var dict_keys = Object.keys(dict)
     var numkeys = dict_keys.length
     var size = magic_offset + numkeys
     var index = (code % size) - magic_offset
@@ -244,8 +253,8 @@
   }
   
   function draw(color, x, y, name) {
-    var sat = 70
-    var lit = 80
+    var sat = 90
+    var lit = 70
     
     var cell = vdom[name]
     
@@ -268,9 +277,13 @@
     }
     
     if(cell.color != color) {
+      var webcolor
       cell.color = color
-      var hsl = 'hsl('+ (color ? color : 300) +', '+ sat +'%, '+ lit +'%)'
-      cell.el.style.backgroundColor = hsl
+      if(code_to_word(color))
+        webcolor = 'hsl('+ (color ? color : 300) +', '+ sat +'%, '+ lit +'%)'
+      else
+        webcolor = 'hsl(0, 0%, ' + Math.floor(50 + ((color*13) % 30)) + '%)'
+      cell.el.style.backgroundColor = webcolor
     }
   }
   
@@ -320,7 +333,7 @@
     var current_index = triple[1]
     var self_addr     = triple[2]
       
-    if(!current_index) { // THINK: -1 ?
+    if(current_index < 1) { // THINK: -1 ?
       pc = return_addr                                  // all done!
     } else {
       current_index--
@@ -329,9 +342,6 @@
       pc = self_addr
     }
   }
-  
-  var magic_offset = 10
-  var dict_keys = Object.keys(dict)
   
   
   // TESTS
@@ -360,7 +370,17 @@
   
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
   
-
+  
+  var old_memory = clone(memory)
+  rando(function looper() {
+    var repeat = JSON.stringify(old_memory) == JSON.stringify(memory)
+    old_memory = clone(memory)
+    if(repeat)
+      rando(looper)
+    else
+      slowrun(memory, looper)
+  })
+  
   
   /* 
     next steps:

@@ -11,18 +11,19 @@
   var memory  = [] // TODO: make this a byte array
   
   var codes   = [] // TODO: make this a byte array
-  var pc      = 0                                       // program counter
+  var pc      = -1                                       // program counter
   
   function run(program) {
     codes = program
-    while(step()) {}
+    while(step(pc++) !== false) {}
     console.log(memory)
   }
   
   function step() {
     var code = codes[pc]
+    if(code == null) return false
     if(dict[code])
-      dict[code]() // TODO: map from # to code, then dict
+      return dict[code]() // TODO: map from # to code, then dict
     else
       stack.push(code)
   }
@@ -61,8 +62,9 @@
   dict['jump'] = function() {
     rstack.push(pc)
     var how_far = stack.pop()
-    if(!how_far)
-    pc = scan_to_sub(how_far)
+    var addr = scan_to_sub(how_far)
+    if(!addr) return dict['exit']()                     // YOLO
+    pc = addr
   } 
   
   dict['exit'] = function() {

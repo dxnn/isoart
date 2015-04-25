@@ -23,8 +23,33 @@
     
   }
   
-  var dict = {
-    
+  var dict = {}
+  dict['+']    = function() {var x = stack.pop(); stack.push((stack.pop() + x) | 0)}
+  dict['-']    = function() {var x = stack.pop(); stack.push((stack.pop() - x) | 0)}
+  dict['*']    = function() {var x = stack.pop(); stack.push((stack.pop() * x) | 0)}
+  dict['/']    = function() {var x = stack.pop(); stack.push((stack.pop() / x) | 0)}
+  
+  dict['>M']   = function() {var addr = stack.pop(); var value = stack.pop(); memory[addr] = value}
+  dict['M>']   = function() {var addr = stack.pop(); stack.push(memory[addr])}
+                 
+  dict['abs' ] = function() {stack.push(Math.abs(stack.pop()))}
+  dict['max' ] = function() {stack.push(Math.max(stack.pop(), stack.pop()))}
+  dict['min' ] = function() {stack.push(Math.min(stack.pop(), stack.pop()))}
+  
+  dict['drop'] = function() {stack.pop()}
+  dict['pick'] = function() {var p=stack.pop(); stack.push(stack[stack.length-p-1])}
+  dict['roll'] = function() {var p=stack.pop(); var x=stack[stack.length-p-1]; stack.splice(stack.length-p-1, 1); stack.push(x)}
+
+  dict['jump'] = function() {
+    rstack.push(pc)
+    var how_far = stack.pop() % 4                       // NOTE: 4 is magic
+    pc = scan_to_sub(how_far)
+  } 
+  
+  dict['exit'] = function() {
+    if(!rstack.length) return false                     // stop execution
+    var addr = rstack.pop()
+    pc = addr
   }
   
 </script>

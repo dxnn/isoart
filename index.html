@@ -297,7 +297,7 @@
   }
   
   function draw_stacks() {
-    el_stack.innerText = 'Stack: ' + stack.slice(-40)
+    el_stack.innerText = 'Stack (' + stack.length + '): ' + stack.slice(-40)
     el_rstack.innerText = 'Return stack: ' + rstack.map(function(item) {return item[1]})
   }
   

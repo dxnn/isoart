@@ -39,6 +39,14 @@
   
 <script>
   
+  /*
+  
+    This is all imperative and mutating and global and awful,
+    but it was also written at a hack day so don't judge too harshly. ^_^
+  
+  */
+  
+  
   var  stack  = []                                      // parameter stack
   var rstack  = []                                      // return stack
   var memory  = []                                      // TODO: make this a byte array
@@ -330,10 +338,16 @@
     if(cell.color != color || cell.sat_flag != sat_flag) {
       var webcolor
       cell.color = color
-      if(code_to_word(color))
-        webcolor = 'hsl('+ (color ? color : 300) +', '+ sat +'%, '+ lit +'%)'
-      else
+      var word = code_to_word(color)
+
+      if(word) {
+        var code = word_to_code(word)
+        webcolor = 'hsl('+ (code * 13) +', '+ sat +'%, '+ lit +'%)'
+      }
+      else {
         webcolor = 'hsl(0, 0%, ' + Math.floor((sat_flag ? 70 : 40) + ((color*13) % 40)) + '%)'
+      }
+      
       cell.el.style.backgroundColor = webcolor
     }
   }
@@ -423,8 +437,9 @@
   
   
   rando(function looper() {
-    var repeat = JSON.stringify(program) == JSON.stringify(memory)
-    if(repeat)
+    var repeat = JSON.stringify(program) != JSON.stringify(memory)
+
+    if(repeat && Math.floor(Math.random() * 10)) // hack to avoid getting stuck in boring cycles
       slowrun(memory, looper)
     else
       rando(looper)
@@ -438,8 +453,8 @@
     -- visualize memory 
     -- step using window.requestAnimationFrame
     -- visualize program execution
+    -- iterate program: (F(F))(F(F)) etc. e.g. F = F(F)
     - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)
-    - iterate program: (F(F))(F(F)) etc. e.g. F = F(F)
     - wrap subroutines nicely
     
   */

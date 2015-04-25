@@ -93,8 +93,12 @@
   function rando(done) {
     hack_dict()
     memory  = randfill(256)
-    program = randfill(256)
+    program = clone(memory)
     slowrun(program, done)
+  }
+  
+  function clone(arr) {
+    return JSON.parse(JSON.stringify(arr))
   }
   
   function hack_dict() {

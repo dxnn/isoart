@@ -25,8 +25,9 @@
   function step() {
     var code = codes[pc]
     if(code == null) return false
-    if(dict[code])
-      return dict[code]() // TODO: map from # to code, then dict
+    var maybe_word = code_to_word(code)
+    if(maybe_word)
+      return dict[maybe_word]()
     else
       push(code)
   }
@@ -41,7 +42,7 @@
   
   function next_exit(offset) {
     for(var i = offset+1; i < codes.length; i++)        // +1 for luck
-      if(codes[i] == 'exit') // TODO: map # to code
+      if(code_to_word(codes[i]) == 'exit')
         return i
   }
   
@@ -175,7 +176,17 @@
   
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
     
-  
+  /* 
+    next steps:
+    - fix step() to eat codes
+    - fix memory size before running
+    - visualize program execution
+    - visualize memory 
+    - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)
+    - iterate program: (F(F))(F(F)) etc. e.g. F = F(F)
+    - wrap subroutines nicely
+    
+  */
   
 </script>
 </body></html>

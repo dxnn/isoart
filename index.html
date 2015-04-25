@@ -17,7 +17,7 @@
     pc = -1
     stack  = []
     rstack = []
-    codes = program
+    codes = compile(program) // OPT
     while(step(pc++) !== false) {}
     console.log(memory, stack)
   }
@@ -164,14 +164,18 @@
             , 'dup', 2, 'roll'    // dup value, swap positions for >M
             , '>M'                // put it back in memory at loop index
             , 1, 'roll'           // value then address
-            , 1, '-', '>M'                // put it back in memory at loop index minus one
+            , 1, '-', '>M'        // put it back in memory at loop index minus one
             , 'exit']             // return from sub
 
   run(program)
   if(JSON.stringify(memory) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
   if(JSON.stringify(stack)  != '[]') console.error('YO!')
   
+  if(JSON.stringify(compile(program)) != JSON.stringify(compile(compile(program)))) console.error('WOW!')
+  
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
+    
+  
   
 </script>
 </body></html>

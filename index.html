@@ -72,6 +72,7 @@
       draw_memory(memory)
       draw_codes(codes)
       draw_highlight(pc)
+      draw_saturation(pc)
       draw_stacks()
       
       if(step(pc++) !== false)
@@ -268,19 +269,40 @@
     draw(0, x, y, 'highlight')
   }
   
+  function draw_saturation(pc) {
+    var nick = 'codes'
+    var hoff = 0
+    var voff = 0
+    var wrap = 16
+    var width = 30
+    var height = 30
+    
+    var x = width * (pc % wrap) + hoff
+    var y = height * (Math.floor(pc/wrap)) + voff
+    var name = pc + nick
+    
+    var cell = vdom[name]
+    if(!cell) return false
+    
+    color = cell.color
+    draw(color, x, y, name, 1)
+  }
+  
   function draw_stacks() {
-    el_stack.innerText = 'Stack: ' + stack
+    el_stack.innerText = 'Stack: ' + stack.slice(0, 50)
     el_rstack.innerText = 'Return stack: ' + rstack
   }
   
-  function draw(color, x, y, name) {
-    var sat = 40
+  function draw(color, x, y, name, sat_flag) {
+    var base_sat = 40
+    var full_sat = 100
+    var sat = sat_flag ? full_sat : base_sat
     var lit = 70
     
     var cell = vdom[name]
     
     if(!cell) {
-      cell = {x: 'asdf', y: 'asdf', color: 'asdf'}
+      cell = {x: 'asdf', y: 'asdf', color: 'asdf', sat_flag: sat_flag}
       cell.el = document.createElement("div")
       cell.el.classList.add('box')
       document.body.insertBefore(cell.el, bottom); 
@@ -297,7 +319,7 @@
       cell.el.style.top = '' + y + 'px'
     }
     
-    if(cell.color != color) {
+    if(cell.color != color || cell.sat_flag != sat_flag) {
       var webcolor
       cell.color = color
       if(code_to_word(color))

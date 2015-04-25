@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8" />
-<title>Art Makes Programs</title>
+<title>Isomorphic Artwork</title>
 <style>
   .box {
     height: 30px;
@@ -21,6 +21,10 @@
     position: absolute;
     top: 530px;
   }
+  #legend {
+    position: absolute;
+    top: 560px;
+  }
 </style>
 </head><body>
   
@@ -29,6 +33,9 @@
 
   <div id="stack"></div>
   <div id="rstack"></div>
+  
+  <div id="legend">Isomorphic Artwork -- a tiny stack machine by dann</div>
+  
   
 <script>
   
@@ -72,7 +79,7 @@
       draw_memory(memory)
       draw_codes(codes)
       draw_highlight(pc)
-      draw_saturation(pc)
+      draw_saturation(pc, true)
       draw_stacks()
       
       if(step(pc++) !== false)
@@ -84,18 +91,13 @@
   }
   
   function rando(done) {
-    // var old_dict = dict
-    // dict = fix_dict()
-    fix_dict()
+    hack_dict()
     memory  = randfill(256)
     program = randfill(256)
     slowrun(program, done)
-    // dict = old_dict
   }
   
-  function fix_dict() {
-    // var new_dict = JSON.parse(JSON.stringify(dict))
-
+  function hack_dict() {
     dict['M>1'] = dict['M>']
     dict['M>2'] = dict['M>']
     dict['M>3'] = dict['M>']
@@ -117,10 +119,16 @@
 
     dict['jump1'] = dict['jump']
     dict['jump2'] = dict['jump']
-    dict['jump3'] = dict['jump']
     
-    return dict
-    // return new_dict
+    var old_exit = dict['exit']
+    dict['exit'] = function() {
+      var out = old_exit()
+      // dehighlight back to new pc
+      for(var i = codes.length - 1; i >= pc; i--) {
+        draw_saturation(i, false)
+      }
+      return out
+    }
   }
   
   function clone(arr) {
@@ -269,7 +277,7 @@
     draw(0, x, y, 'highlight')
   }
   
-  function draw_saturation(pc) {
+  function draw_saturation(pc, flag) {
     var nick = 'codes'
     var hoff = 0
     var voff = 0
@@ -285,12 +293,12 @@
     if(!cell) return false
     
     color = cell.color
-    draw(color, x, y, name, 1)
+    draw(color, x, y, name, flag)
   }
   
   function draw_stacks() {
-    el_stack.innerText = 'Stack: ' + stack.slice(0, 50)
-    el_rstack.innerText = 'Return stack: ' + rstack
+    el_stack.innerText = 'Stack: ' + stack.slice(-40)
+    el_rstack.innerText = 'Return stack: ' + rstack.map(function(item) {return item[1]})
   }
   
   function draw(color, x, y, name, sat_flag) {
@@ -325,7 +333,7 @@
       if(code_to_word(color))
         webcolor = 'hsl('+ (color ? color : 300) +', '+ sat +'%, '+ lit +'%)'
       else
-        webcolor = 'hsl(0, 0%, ' + Math.floor(50 + ((color*13) % 30)) + '%)'
+        webcolor = 'hsl(0, 0%, ' + Math.floor((sat_flag ? 70 : 40) + ((color*13) % 40)) + '%)'
       cell.el.style.backgroundColor = webcolor
     }
   }

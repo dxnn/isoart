@@ -7,10 +7,17 @@
     width: 30px;
     position: absolute;
   }
+  #pc {
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    background-color: hsla(0, 100%, 100%, 0.8); 
+  }
 </style>
 </head><body>
   
   <div id="bottom"></div>
+  <div id="pc"></div>
   
 <script>
   
@@ -23,6 +30,8 @@
   var vdom    = {}                                      // virtual dom
 
   var bottom  = document.getElementById('bottom')       // divs are appended above this
+  var highlight = document.getElementById('pc')         // divs are appended above this
+  vdom['highlight'] = {el: highlight, color: 0}
   
   function reset() {
     pc = -1
@@ -45,6 +54,7 @@
     function loop() {
       draw_memory(memory)
       draw_codes(codes)
+      draw_highlight(pc)
       
       if(step(pc++) !== false)
         window.requestAnimationFrame(loop)
@@ -169,6 +179,18 @@
       var color = arr[i]
       draw(color, x, y, i + nick)
     }
+  }
+  
+  function draw_highlight(pc) {
+    var hoff = -10
+    var voff = -10
+    var wrap = 16
+    var width = 30
+    var height = 30
+    var x = width * (pc % wrap) + hoff
+    var y = height * (Math.floor(pc/wrap)) + voff
+    
+    draw(0, x, y, 'highlight')
   }
   
   function draw(color, x, y, name) {

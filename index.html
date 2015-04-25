@@ -36,7 +36,7 @@
     //  % 4 // NOTE: 4 is magic
     var addr = next_exit(pc)
     if(!addr) return false                              // cause 0 addr would be silly
-    return addr+1
+    return addr
   }
   
   function next_exit(offset) {
@@ -70,6 +70,8 @@
   dict['pick'] = function() {var p=pop(); push(stack[stack.length-p-1])}
   dict['roll'] = function() {var p=pop(); var x=stack[stack.length-p-1]; stack.splice(stack.length-p-1, 1); push(x)}
 
+  dict['dup'] = function() {push(stack[stack.length-1])} // TODO: remove this later
+
   dict['jump'] = function() {
     var index = pop()    
     var how_far = pop()
@@ -79,6 +81,7 @@
     
     var triple = [pc, index, addr]
     rstack.push(triple)
+    stack.push(index)
     
     pc = addr
   } 
@@ -94,8 +97,9 @@
     if(!current_index) { // THINK: -1 ?
       pc = return_addr                                  // all done!
     } else {
+      current_index--
       push(current_index)
-      rstack.push([return_addr, current_index-1, self_addr])
+      rstack.push([return_addr, current_index, self_addr])
       pc = self_addr
     }
   }
@@ -105,18 +109,22 @@
   run([1, 2, 3, 4, '+', '*', '+'])
   if(stack[0] != 15 || !stack.length) console.error('ASDF!')
   
-  memory  = [0, 0, 100, 0, 100, 0, 0, 0, 100, 0, 0, 0]
+  memory  = [0, 0, 100, 200, 0, 0, 0, 100, 50, 0, 0, 0, 0]
   program = [ 10, 'jump', 'exit'  // loop sub 10 times
             , 'dup', 'dup'        // copy loop index twice
             , 1, '-'              // take one less than loop index
-            , 'M>', 1, 'pick'     // grab from mem, roll under loop index
+            , 'M>', 1, 'pick'     // grab from mem, pick loop index
             , 'M>'                // grab from mem
-            , '+', 2, '/'         // average
-            , 1, 'pick'           // value then address
+            , '+', 2, '/'         // average neighbors
+            , 'dup', 2, 'roll'    // dup value, swap positions for >M
             , '>M'                // put it back in memory at loop index
+            , 1, 'roll'           // value then address
+            , '>M'                // put it back in memory at loop index minus one
             , 'exit']             // return from sub
 
-  // run(program)
+  run(program)
+  if(JSON.stringify(memory) != '[0,0,50,22,100,0,0,50,75,25,0,0,0]') console.error('QWERTY!')
+  if(JSON.stringify(stack)  != '[]') console.error('YO!')
   
 </script>
 </body></html>

@@ -13,11 +13,22 @@
     position: absolute;
     background-color: hsla(0, 100%, 100%, 0.8); 
   }
+  #stack {
+    position: absolute;
+    top: 500px;
+  }
+  #rstack {
+    position: absolute;
+    top: 530px;
+  }
 </style>
 </head><body>
   
   <div id="bottom"></div>
   <div id="pc"></div>
+
+  <div id="stack"></div>
+  <div id="rstack"></div>
   
 <script>
   
@@ -32,6 +43,10 @@
   var bottom  = document.getElementById('bottom')       // divs are appended above this
   var highlight = document.getElementById('pc')         // divs are appended above this
   vdom['highlight'] = {el: highlight, color: 0}
+  
+  var el_stack = document.getElementById('stack')       // divs are appended above this
+  var el_rstack = document.getElementById('rstack')     // divs are appended above this
+
   
   var magic_offset = 10
   
@@ -57,6 +72,7 @@
       draw_memory(memory)
       draw_codes(codes)
       draw_highlight(pc)
+      draw_stacks()
       
       if(step(pc++) !== false)
         window.requestAnimationFrame(loop)
@@ -252,8 +268,13 @@
     draw(0, x, y, 'highlight')
   }
   
+  function draw_stacks() {
+    el_stack.innerText = 'Stack: ' + stack
+    el_rstack.innerText = 'Return stack: ' + rstack
+  }
+  
   function draw(color, x, y, name) {
-    var sat = 90
+    var sat = 40
     var lit = 70
     
     var cell = vdom[name]
@@ -316,11 +337,11 @@
     var addr = scan_to_sub(how_far)
     if(!addr) return dict['exit']()                     // YOLO
     
-    index = index % 8 // more fun
+    index = index % 2 // more fun
     
     var triple = [pc, index, addr]
     rstack.push(triple)
-    stack.push(index)
+    push(index)
     
     pc = addr
   } 
@@ -329,9 +350,9 @@
     if(!rstack.length) return false                     // stop execution
     
     var triple = rstack.pop()
-    var return_addr   = triple[0]
-    var current_index = triple[1]
-    var self_addr     = triple[2]
+    var return_addr   = triple[0] || 0
+    var current_index = triple[1] || 0
+    var self_addr     = triple[2] || 0
       
     if(current_index < 1) { // THINK: -1 ?
       pc = return_addr                                  // all done!

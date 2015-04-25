@@ -46,11 +46,21 @@
   }
   
   function push(val) {
-    stack.push( (val | 0) % 255)
+    stack.push( +val )
   }
   
   function pop() {
     return stack.pop()
+  }
+  
+  function read(addr) {
+    return memory[addr] | 0
+  }
+  
+  function write(addr, val) {
+    if(addr < 0) addr = 0
+    if(addr >= memory.length) addr = memory.length - 1
+    memory[addr] = (val | 0) % 255 // memory values are constrained
   }
   
   var dict = {}
@@ -59,8 +69,8 @@
   dict['*']    = function() {var x = pop(); push((pop() * x) | 0)}
   dict['/']    = function() {var x = pop(); push((pop() / x) | 0)}
   
-  dict['>M']   = function() {var addr = pop(); var value = pop(); memory[addr] = value}
-  dict['M>']   = function() {var addr = pop(); push(memory[addr])}
+  dict['>M']   = function() {var addr = pop(); var value = pop(); write(addr, value)}
+  dict['M>']   = function() {var addr = pop(); push(read(addr))}
                  
   dict['abs' ] = function() {push(Math.abs(pop()))}
   dict['max' ] = function() {push(Math.max(pop(), pop()))}
@@ -109,7 +119,7 @@
   run([1, 2, 3, 4, '+', '*', '+'])
   if(stack[0] != 15 || !stack.length) console.error('ASDF!')
   
-  memory  = [0, 0, 100, 200, 0, 0, 0, 100, 50, 0, 0, 0, 0]
+  memory  = [50, 0, 100, 200, 0, 0, 0, 100, 50, 0, 0]
   program = [ 10, 'jump', 'exit'  // loop sub 10 times
             , 'dup', 'dup'        // copy loop index twice
             , 1, '-'              // take one less than loop index
@@ -119,11 +129,11 @@
             , 'dup', 2, 'roll'    // dup value, swap positions for >M
             , '>M'                // put it back in memory at loop index
             , 1, 'roll'           // value then address
-            , '>M'                // put it back in memory at loop index minus one
+            , 1, '-', '>M'                // put it back in memory at loop index minus one
             , 'exit']             // return from sub
 
   run(program)
-  if(JSON.stringify(memory) != '[0,0,50,22,100,0,0,50,75,25,0,0,0]') console.error('QWERTY!')
+  if(JSON.stringify(memory) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
   if(JSON.stringify(stack)  != '[]') console.error('YO!')
   
 </script>

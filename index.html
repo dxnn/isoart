@@ -34,7 +34,7 @@
   <div id="stack"></div>
   <div id="rstack"></div>
   
-  <div id="legend">Isomorphic Artwork -- a tiny stack machine by dann</div>
+  <div id="legend">Isomorphic Artwork: the image is a program that manipulates images which become programs</div>
   
   
 <script>
@@ -64,6 +64,7 @@
 
   
   var magic_offset = 16
+  var magic_switch = true
   
   function reset() {
     pc = -1
@@ -98,8 +99,20 @@
     window.requestAnimationFrame(loop)
   }
   
-  function rando(done) {
+  function funrun() {
     hack_dict()
+    rando(function looper() {
+      if(!magic_switch) return
+      var numdiffs = count_diffs(memory, program)
+
+      if(Math.floor(Math.random() * numdiffs)) // hack to avoid getting stuck in boring cycles
+        slowrun(memory, looper)
+      else
+        rando(looper)
+    })
+  }
+  
+  function rando(done) {
     memory  = randfill(256)
     program = clone(memory)
     slowrun(program, done)
@@ -128,15 +141,6 @@
     dict['>M7'] = dict['>M']
     dict['>M8'] = dict['>M']
     dict['>M9'] = dict['>M']
-    // dict['>Ma1'] = dict['>M']
-    // dict['>Ma2'] = dict['>M']
-    // dict['>Ma3'] = dict['>M']
-    // dict['>Ma4'] = dict['>M']
-    // dict['>Ma5'] = dict['>M']
-    // dict['>Ma6'] = dict['>M']
-    // dict['>Ma7'] = dict['>M']
-    // dict['>Ma8'] = dict['>M']
-    // dict['>Ma9'] = dict['>M']
 
     dict['jump1'] = dict['jump']
     dict['jump2'] = dict['jump']
@@ -144,11 +148,17 @@
     var old_exit = dict['exit']
     dict['exit'] = function() {
       var out = old_exit()
-      // dehighlight back to new pc
+      // dehighlight all the way back to new pc
       for(var i = codes.length - 1; i >= pc; i--) {
         draw_saturation(i, false)
       }
       return out
+    }
+    
+    old_write = write
+    write = function(addr, val) {
+      old_write(addr, val)
+      // preserve memory model
     }
   }
   
@@ -445,14 +455,7 @@
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
   
   
-  rando(function looper() {
-    var numdiffs = count_diffs(memory, program)
-
-    if(Math.floor(Math.random() * numdiffs)) // hack to avoid getting stuck in boring cycles
-      slowrun(memory, looper)
-    else
-      rando(looper)
-  })
+  funrun()
   
   
   /* 
@@ -463,9 +466,9 @@
     -- step using window.requestAnimationFrame
     -- visualize program execution
     -- iterate program: (F(F))(F(F)) etc. e.g. F = F(F)
+    - highlight changes in memory
     - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)
     - wrap subroutines nicely
-    - highlight changes in memory
     - optimizations
     - rando should look for high-diff programs
     

@@ -63,7 +63,7 @@
   var el_rstack = document.getElementById('rstack')     // divs are appended above this
 
   
-  var magic_offset = 10
+  var magic_offset = 16
   
   function reset() {
     pc = -1
@@ -109,25 +109,34 @@
     return JSON.parse(JSON.stringify(arr))
   }
   
+  function count_diffs(a1, a2) {
+    var arr = zip(a1, a2)
+    return arr.reduce(function(acc, pair) {return acc + (pair[0] !== pair[1])}, 0)
+  }
+  
+  function zip(a1, a2) {
+    return a1.map(function(x, i) {return [x, a2[i]]}) // happy path only
+  }
+  
   function hack_dict() {
-    dict['M>1'] = dict['M>']
-    dict['M>2'] = dict['M>']
-    dict['M>3'] = dict['M>']
-    dict['M>4'] = dict['M>']
-    dict['M>5'] = dict['M>']
-    dict['M>6'] = dict['M>']
-    dict['M>7'] = dict['M>']
-    dict['M>8'] = dict['M>']
-    dict['M>9'] = dict['M>']
-    dict['M>a1'] = dict['M>']
-    dict['M>a2'] = dict['M>']
-    dict['M>a3'] = dict['M>']
-    dict['M>a4'] = dict['M>']
-    dict['M>a5'] = dict['M>']
-    dict['M>a6'] = dict['M>']
-    dict['M>a7'] = dict['M>']
-    dict['M>a8'] = dict['M>']
-    dict['M>a9'] = dict['M>']
+    dict['>M1'] = dict['>M']
+    dict['>M2'] = dict['>M']
+    dict['>M3'] = dict['>M']
+    dict['>M4'] = dict['>M']
+    dict['>M5'] = dict['>M']
+    dict['>M6'] = dict['>M']
+    dict['>M7'] = dict['>M']
+    dict['>M8'] = dict['>M']
+    dict['>M9'] = dict['>M']
+    // dict['>Ma1'] = dict['>M']
+    // dict['>Ma2'] = dict['>M']
+    // dict['>Ma3'] = dict['>M']
+    // dict['>Ma4'] = dict['>M']
+    // dict['>Ma5'] = dict['>M']
+    // dict['>Ma6'] = dict['>M']
+    // dict['>Ma7'] = dict['>M']
+    // dict['>Ma8'] = dict['>M']
+    // dict['>Ma9'] = dict['>M']
 
     dict['jump1'] = dict['jump']
     dict['jump2'] = dict['jump']
@@ -437,9 +446,9 @@
   
   
   rando(function looper() {
-    var repeat = JSON.stringify(program) != JSON.stringify(memory)
+    var numdiffs = count_diffs(memory, program)
 
-    if(repeat && Math.floor(Math.random() * 10)) // hack to avoid getting stuck in boring cycles
+    if(Math.floor(Math.random() * numdiffs)) // hack to avoid getting stuck in boring cycles
       slowrun(memory, looper)
     else
       rando(looper)
@@ -456,6 +465,9 @@
     -- iterate program: (F(F))(F(F)) etc. e.g. F = F(F)
     - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)
     - wrap subroutines nicely
+    - highlight changes in memory
+    - optimizations
+    - rando should look for high-diff programs
     
   */
   

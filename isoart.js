@@ -248,7 +248,7 @@ dict['jump'] = function() {
   var addr = scan_to_sub(how_far)
   if(!addr) return dict['exit']()                     // YOLO
   
-  index = index % 2 // 2 is more fun
+  // index = index % 2 // 2 is more fun
   
   var triple = [pc||0, index||0, addr||0]             // ugh NaNs whyyyyyyyy?
   rstack.push(triple)

@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8" />
-<title>Isomorphic Artwork</title>
+<title>Isoart Take One</title>
 <style>
   .box {
     height: 30px;
@@ -34,19 +34,16 @@
   <div id="stack"></div>
   <div id="rstack"></div>
   
-  <div id="legend">Isomorphic Artwork: the image is a program that manipulates images which become programs</div>
+  <div id="legend">lalalala</div>
   
   <script src="isoart.js"></script>
   <script src="renderer.js"></script>
   
 <script>
 
+  // A program that manipulates an image (probably blur)
 
-  // TESTS
-  
-  run([1, 2, 3, 4, '+', '*', '+'])
-  if(stack[0] != 15 || !stack.length) console.error('ASDF!')
-  
+
   memory  = [50, 0, 100, 200, 0, 0, 0, 100, 50, 0, 0]
   program = [ 10, 'jump', 'exit'  // loop sub 10 times
             , 'dup', 'dup'        // copy loop index twice
@@ -69,23 +66,12 @@
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
   
   
-  funrun()
-  
   
   /* 
     next steps:
-    - one
-    - two
-    - three
-    
-    
-    
-    old next steps:
-    - highlight changes in memory
-    - change jump to take two params: count and skip. skip == 0 is no jump (conditional branching)
-    - wrap subroutines nicely
-    - optimizations
-    - rando should look for high-diff programs
+    - write out a whole image manipulation program
+    - run it on an actual image
+    - be cool, man, be cool
   */
   
 </script>

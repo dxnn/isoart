@@ -1,0 +1,165 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8" />
+<title>Isoart Take One</title>
+<style>
+  .lit {
+    background-color: pink;
+  }
+  .box {
+    height: 30px;
+    width: 30px;
+    position: absolute;
+  }
+  #pc {
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    background-color: hsla(0, 100%, 100%, 0.8); 
+  }
+  #stack {
+    position: absolute;
+    top: 500px;
+  }
+  #rstack {
+    position: absolute;
+    top: 530px;
+  }
+  #legend {
+    position: absolute;
+    top: 560px;
+  }
+  #program {
+    width: 450px;
+    height: 450px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+  
+  <div id="vizprog"><pre><code>
+  <span id="command-1">255</span> <span id="command-2">jump</span> <span id="command-3">exit</span>   // loop sub 255 times
+  <span id="command-4">dup</span> <span id="command-5">dup</span>         // copy loop index twice
+  <span id="command-6">1</span> <span id="command-7">-</span>             // take one less than loop index
+  <span id="command-8">M></span> <span id="command-9">1</span> <span id="command-10">pick</span>       // grab from mem, pick loop index
+  <span id="command-11">M></span>              // grab from mem
+  <span id="command-12">+</span> <span id="command-13">2</span> <span id="command-14">/</span>           // average neighbors
+  <span id="command-15">dup</span> <span id="command-16">2</span> <span id="command-17">roll</span>      // dup value, swap positions for >M
+  <span id="command-18">>M</span>              // put it back in memory at loop index
+  <span id="command-19">1</span> <span id="command-20">roll</span>          // value then address
+  <span id="command-21">1</span> <span id="command-22">-</span> <span id="command-23">>M</span>          // put it back in memory at loop index minus one
+  <span id="command-24">exit</span>            // return from sub
+  </code></pre></div>
+  
+  <div id="bottom"></div>
+  <div id="pc"></div>
+
+  <div id="stack"></div>
+  <div id="rstack"></div>
+  
+  <div id="legend">Take a step: <button id="step">Step</button></div>
+  
+  <script src="isoart.js"></script>
+  <script src="renderer.js"></script>
+  
+  <script id="face" type="text/isoart">
+    9   20  20  20  20  20  20  20  20  20  20  20  20  20  20  30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   210 210 210 0   0   0   0   210 210 210 0   0   30
+    9   0   0   0   210 0   0   0   0   0   0   210 0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   210 0   0   0   0   0   0   0   0   210 0   0   30
+    9   0   0   0   210 0   0   0   0   0   0   210 0   0   0   30
+    9   0   0   0   0   210 0   0   0   0   210 0   0   0   0   30
+    9   0   0   0   0   0   210 210 210 210 0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   50  50  50  50  50  50  50  50  50  50  50  50  50  50  30
+  </script>
+  
+  <script id="program" type="text/isoart">
+  255 jump exit   // loop sub 255 times
+  dup dup         // copy loop index twice
+  1 -             // take one less than loop index
+  M> 1 pick       // grab from mem, pick loop index
+  M>              // grab from mem
+  + 2 /           // average neighbors
+  dup 2 roll      // dup value, swap positions for >M
+  >M              // put it back in memory at loop index
+  1 roll          // value then address
+  1 - >M          // put it back in memory at loop index minus one
+  exit            // return from sub
+  </script>
+  
+  
+<script>
+
+  var el = document.getElementById.bind(document)
+  var el_program = el('program')
+  var el_memory  = el('face')
+  var el_step    = el('step')
+  
+  function parser(str) {
+    return str.replace(/\/\/.*/g, '').split(/\s+/g).filter(function(x) {return x !== ''})
+  }
+  
+  reset()
+  var program = parser(el_program.textContent)
+  var memory  = parser(el_memory.textContent)
+  codes = compile(program) // global ugh sorry
+    
+  draw_memory(memory)
+  draw_stacks()
+  
+  el_step.addEventListener('click', function() {
+    dehighlight(pc+1)
+    step(pc++)
+    draw_memory(memory)
+    draw_stacks()
+    highlight(pc+1)
+  })
+  
+  function highlight(index) {
+    var el_command = el('command-' + index)
+    if(!el_command) return false
+    el_command.classList.add('lit')
+  }
+  
+  function dehighlight(index) {
+    var el_command = el('command-' + index)
+    if(!el_command) return false
+    el_command.classList.remove('lit')
+  }
+  
+  // el_program.addEventListener('DOMCharacterDataModified', dwrapper)
+  
+  
+  
+  /*
+  run(program)
+  if(JSON.stringify(memory.slice(0, 11)) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
+  if(JSON.stringify(stack)  != '[]') console.error('YO!')
+  
+  if(JSON.stringify(compile(program)) != JSON.stringify(compile(compile(program)))) console.error('WOW!')
+  
+  if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
+  
+  */
+  
+  /* 
+    next steps:
+    - show program next to memory with 'run' button
+    - make it really greyscale
+    - make the image better
+    -- write out a whole image manipulation program
+    -- run it on an actual image
+    -- be cool, man, be cool
+  */
+  
+</script>
+</body></html>

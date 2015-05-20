@@ -202,7 +202,7 @@ function code_to_word(code) {
 
 function compile(program) {
   return program.map(function(word) {
-    if(word == +word) return word
+    if(word == +word) return +word
     var maybe_code = word_to_code(word)
     if(maybe_code === false) return 0
     return maybe_code + magic_offset
@@ -274,5 +274,11 @@ dict['exit'] = function() {
     pc = self_addr
   }
 }
+
+
+
+
+
+
 
 

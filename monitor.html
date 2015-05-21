@@ -1,0 +1,88 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style>
+  canvas {
+    height: 688px;
+    width: 50px;
+    float: left;
+    background: black;
+    margin: 2px;
+  }
+</style>
+</head><body>
+
+<div id="bottom"></div>
+
+<script>
+
+files  = {}
+active = []
+
+function receiveMessage(event) {
+  console.log(event)
+
+  var data = event.data
+  
+  for(var key in data) {
+    var count  = data[key]
+    var pieces = key.split('-')
+    var end    = [pieces.pop(), pieces.pop()]
+    var start  = [pieces.pop(), pieces.pop()]
+    var file   = pieces.join('-')
+    if(!files[file]) {
+      // build new canvas
+      var canvas_name = 'canvas-' + file
+      var canvas = document.createElement('canvas')
+      canvas.setAttribute('id', canvas_name)
+      document.body.insertBefore(canvas, bottom)
+      var ctx = document.getElementById(canvas_name).getContext('2d')
+      
+      files[file] = { nodes: {} // map from start c+o to hit-count
+                    , ctx: ctx
+                    }
+    }
+
+    active.push([file, start, count, 0])
+  }
+
+  var last_active = 0
+
+  for (var i = 0; i < active.length; i++) {
+    var list  = active[i]
+    var file  = list[0]
+    var start = list[1]
+    var count = list[2]
+    var iters = list[3]
+    
+    var ctx = files[file].ctx
+    var x = start[0]
+    var y = Math.min((start[1] / 2), 50)
+        
+    if(!last_active && iters < 5)
+      last_active = i
+    
+    if(iters > 5) {
+      ctx.fillStyle = 'hsl(' + 0 + ', 100%, 80%)'
+      ctx.fillRect(x, y, 2, 2);
+    } else {
+      ctx.fillStyle = 'hsl(' + 200 + ', 100%, 80%)'
+      ctx.fillRect(x, y, 2, 2);
+    }
+    
+    list[3]++
+  }
+  
+  // filter step: truncate active to last iters > 5
+  if(last_active)
+    active = active.slice(last_active)
+
+  // var div = document.createElement("div")
+  // div.textContent = JSON.stringify(event.data)
+  // document.body.insertBefore(div, bottom)
+
+}
+
+window.addEventListener("message", receiveMessage, false);
+ 
+</script>
+</body></html>

@@ -80,7 +80,7 @@ function draw(color, x, y, name, sat_flag) {
     cell = {x: 'asdf', y: 'asdf', color: 'asdf', sat_flag: sat_flag}
     cell.el = document.createElement("div")
     cell.el.classList.add('box')
-    document.body.insertBefore(cell.el, bottom); 
+    document.body.insertBefore(cell.el, bottom)
     vdom[name] = cell
   }
   

@@ -143,10 +143,16 @@
   var popup = window.open('http://127.0.0.1/~dann/genart/monitor.html')
   
   /*
+    tracer.trackHits()
+    var popup = window.open('http://127.0.0.1/~dann/genart/monitor.html')
+  
     function gogo() {
-      popup.postMessage(tracer.hitCountDeltas(0), "*")
+      var list = tracer.hitCountDeltas(0)
+      if(list.length) 
+        popup.postMessage(list, "*")
       setTimeout(gogo, 300)
     }
+    gogo()
   */
 
 </script>

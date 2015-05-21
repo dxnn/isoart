@@ -34,6 +34,8 @@ function receiveMessage(event) {
       var canvas_name = 'canvas-' + file
       var canvas = document.createElement('canvas')
       canvas.setAttribute('id', canvas_name)
+      canvas.setAttribute('height', 688)
+      canvas.setAttribute('width', 50)
       document.body.insertBefore(canvas, bottom)
       var ctx = document.getElementById(canvas_name).getContext('2d')
       
@@ -45,7 +47,7 @@ function receiveMessage(event) {
     active.push([file, start, count, 0])
   }
 
-  var last_active = 0
+  var last_active = -1
 
   for (var i = 0; i < active.length; i++) {
     var list  = active[i]
@@ -55,17 +57,20 @@ function receiveMessage(event) {
     var iters = list[3]
     
     var ctx = files[file].ctx
-    var x = start[0]
-    var y = Math.min((start[1] / 2), 50)
+    var x = Math.min((start[0] / 2), 50)
+    var y = start[1]
+    
+    if(y > 500)
+      y = 500 + Math.sqrt(y)
         
-    if(!last_active && iters < 5)
+    if(last_active < 0 && iters < 5)
       last_active = i
     
     if(iters > 5) {
       ctx.fillStyle = 'hsl(' + 0 + ', 100%, 80%)'
       ctx.fillRect(x, y, 2, 2);
     } else {
-      ctx.fillStyle = 'hsl(' + 200 + ', 100%, 80%)'
+      ctx.fillStyle = 'hsl(' + (200-(iters*40)) + ', 100%, 80%)'
       ctx.fillRect(x, y, 2, 2);
     }
     
@@ -73,8 +78,10 @@ function receiveMessage(event) {
   }
   
   // filter step: truncate active to last iters > 5
-  if(last_active)
+  if(last_active >= 0)
     active = active.slice(last_active)
+  if(active[0] && active[0][3] > 5)
+    active = []
 
   // var div = document.createElement("div")
   // div.textContent = JSON.stringify(event.data)

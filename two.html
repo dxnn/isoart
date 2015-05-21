@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head><meta charset="utf-8" />
-<title>Isoart Take One</title>
+<title>Isoart Take Two</title>
 <style>
   .lit {
     background-color: pink;
@@ -116,14 +116,6 @@
   draw_memory(memory)
   draw_stacks()
   
-  el_step.addEventListener('click', function() {
-    dehighlight(pc+1)
-    step(pc++)
-    draw_memory(memory)
-    draw_stacks()
-    highlight(pc+1)
-  })
-  
   function highlight(index) {
     var el_command = el('command-' + index)
     if(!el_command) return false
@@ -136,8 +128,15 @@
     el_command.classList.remove('lit')
   }
   
-  // el_program.addEventListener('DOMCharacterDataModified', dwrapper)
+  el_step.addEventListener('click', function() {
+    dehighlight(pc+1)
+    step(pc++)
+    draw_memory(memory)
+    draw_stacks()
+    highlight(pc+1)
+  })
   
+  // el_program.addEventListener('DOMCharacterDataModified', dwrapper)
   
   
   /*

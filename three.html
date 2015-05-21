@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8" />
+<title>Isoart Take Three</title>
+<style>
+  .box {
+    height: 30px;
+    width: 30px;
+    position: absolute;
+  }
+  #pc {
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    background-color: hsla(0, 100%, 100%, 0.8); 
+  }
+  #stack {
+    position: absolute;
+    top: 500px;
+  }
+  #rstack {
+    position: absolute;
+    top: 530px;
+  }
+  #legend {
+    position: absolute;
+    top: 560px;
+  }
+</style>
+</head>
+<body>
+  
+  <div id="bottom"></div>
+  <div id="pc"></div>
+
+  <div id="stack"></div>
+  <div id="rstack"></div>
+  
+  <div id="legend">Start the program: <button id="start">Start</button></div>
+  
+  <script src="isoart.js"></script>
+  <script src="renderer.js"></script>
+  
+  <script id="face" type="text/isoart">
+    9   20  20  20  20  20  20  20  20  20  20  20  20  20  20  30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   210 210 210 0   0   0   0   210 210 210 0   0   30
+    9   0   0   0   210 0   0   0   0   0   0   210 0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   210 0   0   0   0   0   0   0   0   210 0   0   30
+    9   0   0   0   210 0   0   0   0   0   0   210 0   0   0   30
+    9   0   0   0   0   210 0   0   0   0   210 0   0   0   0   30
+    9   0   0   0   0   0   210 210 210 210 0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   0   0   0   0   0   0   0   0   0   0   0   0   0   0   30
+    9   50  50  50  50  50  50  50  50  50  50  50  50  50  50  30
+  </script>
+  
+  <script id="program" type="text/isoart">
+  255 jump exit   // loop sub 255 times
+  dup dup         // copy loop index twice
+  1 -             // take one less than loop index
+  M> 1 pick       // grab from mem, pick loop index
+  M>              // grab from mem
+  + 2 /           // average neighbors
+  dup 2 roll      // dup value, swap positions for >M
+  >M              // put it back in memory at loop index
+  1 roll          // value then address
+  1 - >M          // put it back in memory at loop index minus one
+  exit            // return from sub
+  </script>
+  
+<script>
+  
+  var el = document.getElementById.bind(document)
+  var el_program = el('program')
+  var el_memory  = el('face')
+  var el_start   = el('start')
+  
+  function parser(str) {
+    return str.replace(/\/\/.*/g, '').split(/\s+/g).filter(function(x) {return x !== ''})
+  }
+  
+  var program = parser(el_program.textContent)
+  var memory  = parser(el_memory.textContent)
+
+  draw_memory(memory)
+  draw_codes(compile(program))
+  draw_highlight(pc)
+  draw_saturation(pc, true)
+  draw_stacks()
+  
+  
+  el_start.addEventListener('click', function() {
+    slowrun(program)
+  })
+  
+  
+  /* 
+    Program-Image isomorphism, tuning the hyperparameters, applying programs to themselves
+  */
+  
+</script>
+</body></html>

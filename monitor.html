@@ -15,20 +15,28 @@
 
 <script>
 
-  var total = []
-  var files  = {}
-  var active = []
-  var pc = 0
+  var pc = 0            // "current" operation
+  var files = {}        // file name and context
+  var ordering = []     // every invocation in order
+  var invocations = {}  // full invocation data
+  var active = {}       // used for rendering
+  
+  var fillStyle = ''    // cache for perf
 
   function receiveMessage(event) {
-    console.log(event)
     var data = event.data
 
     for(var i = data.length - 1; i >= 0; i--) {
       var item = data[i]
-      var key = item[0]
+      var key  = item[0]
       var name = item[1]
-    
+      
+      if(invocations[key]) {
+        invocations[key].count++
+        ordering.push(invocations[key])
+        continue
+      }
+        
       var pieces   = key.split('-')
       var end      = [pieces.pop(), pieces.pop()]
       var start    = [pieces.pop(), pieces.pop()]
@@ -36,10 +44,10 @@
       
       var file = build_file(filename)
       
-      var newdata = {file: file, start: start, end: end, name: name}
-      total.push(newdata)
-
-      // active.push([file, start, count, 0])
+      var invocation = {file: file, start: start, end: end, name: name, key: key, count: 0}
+      invocations[key] = invocation
+      
+      ordering.push(invocation)
     }
   }
 
@@ -57,56 +65,98 @@
   
     // TODO: mouseovers
     
-    files[filename] = { nodes: {} // map from start c+o to hit-count
-                  , ctx: ctx
-                  }
+    files[filename] = { name: filename
+                      , ctx: ctx
+                      }
                   
     return files[filename]
   }
   
-  function render() {
-    var new_pc = total.length - 1
+  function render_item(item, fill) {
+    var start = item.start
+    var end   = item.end
     
-    for(var i = pc; i < new_pc; i++) {
-      var item  = total[i]
-      var file  = item.file
-      var start = item.start
-      var end   = item.end
-      // var count = item
-      // var iters = item
-    
-      var ctx = file.ctx
-      var x = Math.min((start[0] / 2), 50)
-      var y = start[1]
-    
-      if(y > 500)
-        y = 500 + Math.sqrt(y)
-        
-      // if(iters > 5) {
-        ctx.fillStyle = 'hsl(' + 0 + ', 100%, 80%)'
-        ctx.fillRect(x, y, 2, 2)
-      // } else {
-      //   ctx.fillStyle = 'hsl(' + (200-(iters*40)) + ', 100%, 80%)'
-      //   ctx.fillRect(x, y, 2, 2)
-      // }
-      //
-      // list[3]++
-    }
-    
-    pc = new_pc
-  
-    // filter step: truncate active to last iters > 5
-    // if(last_active >= 0)
-    //   active = active.slice(last_active)
-    // if(active[0] && active[0][3] > 5)
-    //   active = []
+    var file  = item.file
+    var ctx = file.ctx
 
-    // var div = document.createElement("div")
-    // div.textContent = JSON.stringify(event.data)
-    // document.body.insertBefore(div, bottom)
-    
+    var x = Math.min((start[0] / 2), 50)
+    var y = start[1]
+  
+    if(y > 500)
+      y = 500 + Math.sqrt(y)
+      
+    if(fill != fillStyle) {
+      fillStyle = fill
+      ctx.fillStyle = fill
+    }
+
+    ctx.fillRect(x, y, 2, 2)
   }
   
+  function render_cooldowns() {
+    var delete_me = []
+    
+    for(var key in active) {
+      var age = active[key]
+      var item = invocations[key]
+
+      // var count = item.count
+
+      
+      var fill = 'hsl(' + (200-(age*40)) + ', 100%, 80%)'
+      render_item(item, fill)
+      
+      if(age >= 5)
+        delete_me.push(key)
+      else
+        active[key]++
+    }
+    
+    delete_me.forEach(function(key) {
+      delete(active[key])
+    })
+  }
+  
+  function render_selection(from, to) {
+    var fill = 'hsl(' + 0 + ', 100%, 80%)'
+
+    for(var i = from; i < to; i++) {
+      var item  = ordering[i]
+      active[item.key] = 0
+      render_item(item, fill)
+    }
+    
+    render_cooldowns()
+  }
+  
+  function render_inc(increment) {
+    var from = pc
+    var to   = pc + increment
+
+    if(from >= ordering.length-1) // off-by-one
+      return false
+
+    if(to >= ordering.length)
+      to = ordering.length-1
+
+    render_selection(from, to)
+
+    pc = pc + increment      
+  }
+  
+  function clear_files() {
+    for(var key in files) {
+      files[key].ctx.clearRect(0, 0, 1000, 1000)
+    }
+  }
+  
+  
+  gap = 10
+  delta = 100
+  function render_loop() {
+    render_inc(gap)
+    setTimeout(render_loop, delta)
+  }
   window.addEventListener("message", receiveMessage, false);
  
 </script>

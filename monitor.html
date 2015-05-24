@@ -15,81 +15,99 @@
 
 <script>
 
-files  = {}
-active = []
+  var total = []
+  var files  = {}
+  var active = []
+  var pc = 0
 
-function receiveMessage(event) {
-  console.log(event)
+  function receiveMessage(event) {
+    console.log(event)
+    var data = event.data
 
-  var data = event.data
-  
-  for(var key in data) {
-    var count  = data[key]
-    var pieces = key.split('-')
-    var end    = [pieces.pop(), pieces.pop()]
-    var start  = [pieces.pop(), pieces.pop()]
-    var file   = pieces.join('-')
-    if(!files[file]) {
-      // build new canvas
-      var canvas_name = 'canvas-' + file
-      var canvas = document.createElement('canvas')
-      canvas.setAttribute('id', canvas_name)
-      canvas.setAttribute('height', 688)
-      canvas.setAttribute('width', 50)
-      document.body.insertBefore(canvas, bottom)
-      var ctx = document.getElementById(canvas_name).getContext('2d')
+    for(var i = data.length - 1; i >= 0; i--) {
+      var item = data[i]
+      var key = item[0]
+      var name = item[1]
+    
+      var pieces   = key.split('-')
+      var end      = [pieces.pop(), pieces.pop()]
+      var start    = [pieces.pop(), pieces.pop()]
+      var filename = pieces.join('-')
       
-      files[file] = { nodes: {} // map from start c+o to hit-count
-                    , ctx: ctx
-                    }
-    }
+      var file = build_file(filename)
+      
+      var newdata = {file: file, start: start, end: end, name: name}
+      total.push(newdata)
 
-    active.push([file, start, count, 0])
+      // active.push([file, start, count, 0])
+    }
   }
 
-  var last_active = -1
+  function build_file(filename) {
+    if(files[filename]) return files[filename]
 
-  for (var i = 0; i < active.length; i++) {
-    var list  = active[i]
-    var file  = list[0]
-    var start = list[1]
-    var count = list[2]
-    var iters = list[3]
+    // build new canvas
+    var canvas_name = 'canvas-' + filename
+    var canvas = document.createElement('canvas')
+    canvas.setAttribute('id', canvas_name)
+    canvas.setAttribute('height', 688)
+    canvas.setAttribute('width', 50)
+    document.body.insertBefore(canvas, bottom)
+    var ctx = document.getElementById(canvas_name).getContext('2d')
+  
+    // TODO: mouseovers
     
-    var ctx = files[file].ctx
-    var x = Math.min((start[0] / 2), 50)
-    var y = start[1]
-    
-    if(y > 500)
-      y = 500 + Math.sqrt(y)
-        
-    if(last_active < 0 && iters < 5)
-      last_active = i
-    
-    if(iters > 5) {
-      ctx.fillStyle = 'hsl(' + 0 + ', 100%, 80%)'
-      ctx.fillRect(x, y, 2, 2);
-    } else {
-      ctx.fillStyle = 'hsl(' + (200-(iters*40)) + ', 100%, 80%)'
-      ctx.fillRect(x, y, 2, 2);
-    }
-    
-    list[3]++
+    files[filename] = { nodes: {} // map from start c+o to hit-count
+                  , ctx: ctx
+                  }
+                  
+    return files[filename]
   }
   
-  // filter step: truncate active to last iters > 5
-  if(last_active >= 0)
-    active = active.slice(last_active)
-  if(active[0] && active[0][3] > 5)
-    active = []
+  function render() {
+    var new_pc = total.length - 1
+    
+    for(var i = pc; i < new_pc; i++) {
+      var item  = total[i]
+      var file  = item.file
+      var start = item.start
+      var end   = item.end
+      // var count = item
+      // var iters = item
+    
+      var ctx = file.ctx
+      var x = Math.min((start[0] / 2), 50)
+      var y = start[1]
+    
+      if(y > 500)
+        y = 500 + Math.sqrt(y)
+        
+      // if(iters > 5) {
+        ctx.fillStyle = 'hsl(' + 0 + ', 100%, 80%)'
+        ctx.fillRect(x, y, 2, 2)
+      // } else {
+      //   ctx.fillStyle = 'hsl(' + (200-(iters*40)) + ', 100%, 80%)'
+      //   ctx.fillRect(x, y, 2, 2)
+      // }
+      //
+      // list[3]++
+    }
+    
+    pc = new_pc
+  
+    // filter step: truncate active to last iters > 5
+    // if(last_active >= 0)
+    //   active = active.slice(last_active)
+    // if(active[0] && active[0][3] > 5)
+    //   active = []
 
-  // var div = document.createElement("div")
-  // div.textContent = JSON.stringify(event.data)
-  // document.body.insertBefore(div, bottom)
-
-}
-
-window.addEventListener("message", receiveMessage, false);
+    // var div = document.createElement("div")
+    // div.textContent = JSON.stringify(event.data)
+    // document.body.insertBefore(div, bottom)
+    
+  }
+  
+  window.addEventListener("message", receiveMessage, false);
  
 </script>
 </body></html>

@@ -228,9 +228,6 @@ dict['-']    = function() {var x = pop(); push((pop() - x) | 0)}
 dict['*']    = function() {var x = pop(); push((pop() * x) | 0)}
 dict['/']    = function() {var x = pop(); push((pop() / x) | 0)}
 
-dict['>M']   = function() {var addr = pop(); var value = pop(); write(addr, value)}
-dict['M>']   = function() {var addr = pop(); push(read(addr))}
-
 dict['abs' ] = function() {push(Math.abs(pop()))}
 dict['max' ] = function() {push(Math.max(pop(), pop()))}
 dict['min' ] = function() {push(Math.min(pop(), pop()))}
@@ -238,8 +235,10 @@ dict['min' ] = function() {push(Math.min(pop(), pop()))}
 dict['drop'] = function() {pop()}
 dict['pick'] = function() {var p=pop(); push(stack[stack.length-p-1])}
 dict['roll'] = function() {var p=pop(); var x=stack[stack.length-p-1]; stack.splice(stack.length-p-1, 1); push(x)}
+dict['dup']  = function() {push(stack[stack.length-1])}
 
-dict['dup'] = function() {push(stack[stack.length-1])} // TODO: remove this later
+dict['>M']   = function() {var addr = pop(); var value = pop(); write(addr, value)}
+dict['M>']   = function() {var addr = pop(); push(read(addr))}
 
 dict['jump'] = function() {
   var index = pop()

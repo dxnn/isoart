@@ -2,16 +2,29 @@
 <html><head><meta charset="utf-8" />
 <style>
   canvas {
-    height: 688px;
-    width: 50px;
     float: left;
     background: black;
     margin: 2px;
   }
+  #bottom {
+    position: absolute;
+    top: 610px;
+  }
 </style>
 </head><body>
 
-<div id="bottom"></div>
+<div id="bottom">
+  Position: 
+  1
+  <input type="range" name="pos" value="1" min="1" id="pos">
+  <span id="size"></span>
+  <!-- Current: <span id="pc"></span> -->
+  Speed: 1 <input type="range" name="gap" value="20" min="1" max="1000" id="gap"> 1000
+</div>
+
+<div><pre id="text">
+  Mouseover the columns
+</pre></div>
 
 <script>
 
@@ -20,11 +33,17 @@
   var ordering = []     // every invocation in order
   var invocations = {}  // full invocation data
   var active = {}       // used for rendering
-  
   var fillStyle = ''    // cache for perf
+
+  var el_gap  = document.getElementById('gap')
+  var el_pos  = document.getElementById('pos')
+  var el_size = document.getElementById('size')
+  var el_text = document.getElementById('text')
 
   function receiveMessage(event) {
     var data = event.data
+    
+    // extraInvocationInfoById
 
     for(var i = data.length - 1; i >= 0; i--) {
       var item = data[i]
@@ -38,14 +57,18 @@
       }
         
       var pieces   = key.split('-')
-      var end      = [pieces.pop(), pieces.pop()]
-      var start    = [pieces.pop(), pieces.pop()]
+      var end      = [+pieces.pop(), +pieces.pop()]
+      var start    = [+pieces.pop(), +pieces.pop()]
       var filename = pieces.join('-')
       
       var file = build_file(filename)
       
       var invocation = {file: file, start: start, end: end, name: name, key: key, count: 0}
       invocations[key] = invocation
+      
+      for (var i = start[1]; i <= end[1]; i++) {
+        file.nodes_by_line[i] = file.nodes_by_line[i] ? file.nodes_by_line[i].concat(invocation) : [invocation]
+      }
       
       ordering.push(invocation)
     }
@@ -58,90 +81,44 @@
     var canvas_name = 'canvas-' + filename
     var canvas = document.createElement('canvas')
     canvas.setAttribute('id', canvas_name)
-    canvas.setAttribute('height', 688)
-    canvas.setAttribute('width', 50)
+    canvas.setAttribute('height', 595)
+    canvas.setAttribute('width', 98)
     document.body.insertBefore(canvas, bottom)
     var ctx = document.getElementById(canvas_name).getContext('2d')
   
-    // TODO: mouseovers
-    
-    files[filename] = { name: filename
-                      , ctx: ctx
-                      }
-                  
-    return files[filename]
-  }
-  
-  function render_item(item, fill) {
-    var start = item.start
-    var end   = item.end
-    
-    var file  = item.file
-    var ctx = file.ctx
-
-    var x = Math.min((start[0] / 2), 50)
-    var y = start[1]
-  
-    if(y > 500)
-      y = 500 + Math.sqrt(y)
+    var file = { name: filename
+               , nodes_by_line: {}
+               , ctx: ctx
+               }
+               
+    // mouse things
+    var eventId
+    var mousemove = function(e) {
+      var x = e.offsetX
+      var y = e.offsetY - 2 // fudge
+      var lx = Math.floor(x / magic_square)
+      var ly = Math.floor(y / magic_square)
+      var line = ly * magic_row_width + lx
+      var nodes = file.nodes_by_line[line] || []
       
-    if(fill != fillStyle) {
-      fillStyle = fill
-      ctx.fillStyle = fill
+      var text = filename + "\nLine:" + line + "\nNodes:\n  "
+      var node_text = nodes.map(function(n) {return n.name})
+      
+      el_text.textContent = text + node_text.join("\n  ")
     }
-
-    ctx.fillRect(x, y, 2, 2)
-  }
-  
-  function render_cooldowns() {
-    var delete_me = []
-    
-    for(var key in active) {
-      var age = active[key]
-      var item = invocations[key]
-
-      // var count = item.count
-
-      
-      var fill = 'hsl(' + (200-(age*40)) + ', 100%, 80%)'
-      render_item(item, fill)
-      
-      if(age >= 5)
-        delete_me.push(key)
-      else
-        active[key]++
+               
+    var mouseover = function(e) {
+      eventId = canvas.addEventListener('mousemove', mousemove)
+    }
+    var mouseout = function(e) {
+      canvas.removeEventListener('mousemove', eventId)
     }
     
-    delete_me.forEach(function(key) {
-      delete(active[key])
-    })
-  }
-  
-  function render_selection(from, to) {
-    var fill = 'hsl(' + 0 + ', 100%, 80%)'
-
-    for(var i = from; i < to; i++) {
-      var item  = ordering[i]
-      active[item.key] = 0
-      render_item(item, fill)
-    }
+    canvas.addEventListener('mouseover', mouseover)
     
-    render_cooldowns()
-  }
-  
-  function render_inc(increment) {
-    var from = pc
-    var to   = pc + increment
-
-    if(from >= ordering.length-1) // off-by-one
-      return false
-
-    if(to >= ordering.length)
-      to = ordering.length-1
-
-    render_selection(from, to)
-
-    pc = pc + increment      
+    // finish up
+    files[filename] = file   
+    return file
   }
   
   function clear_files() {
@@ -151,13 +128,121 @@
   }
   
   
-  gap = 10
-  delta = 100
-  function render_loop() {
-    render_inc(gap)
-    setTimeout(render_loop, delta)
+  
+  function render_item(item, fill) {
+    var start = item.start
+    var end   = item.end
+    
+    var file  = item.file
+    var ctx   = file.ctx
+    
+    var start_line = start[1]
+    var start_col  = start[0]
+    var end_line   = end[1]
+    var end_col    = end[0]
+    
+    var lines = magic_row_width * magic_row_height
+    if(start_line > lines) return false
+    
+    // TODO: need a per-file cache instead
+    // if(fill != fillStyle) {
+    //   fillStyle = fill
+      ctx.fillStyle = fill
+    // }
+    
+    var total_lines = end_line - start_line
+    for(var i = 0; i <= total_lines; i++) {
+      var line = start_line + i
+      var y = Math.floor(line / magic_row_width)
+      var x = line % magic_row_width
+      ctx.fillRect(x*magic_square, y*magic_square, magic_square, magic_square)
+    }
   }
-  window.addEventListener("message", receiveMessage, false);
+  
+  function render_active() {
+    var delete_me = []
+    
+    for(var key in active) {
+      var age = active[key]
+      var item = invocations[key]
+      var count = item.count
+      
+      var base_lit  = 50
+      var lit_boost = 3 * Math.log2(count+2)
+      var lit = Math.min(base_lit + lit_boost, 100)
+      
+      var hue = 200 - (age * 20)
+      if(hue)
+        lit = 80
+      
+      var fill = 'hsl(' + hue + ', 100%, ' + lit + '%)'
+      render_item(item, fill)
+      
+      if(age >= 10) {
+        delete_me.push(key)
+      } else {
+        active[key]++
+      }
+    }
+    
+    delete_me.forEach(function(key) {
+      delete(active[key])
+    })
+  }
+  
+  function render_display() {
+    // el_pc.textContent = pc + 1
+    el_size.textContent = ordering.length
+    el_pos.max = ordering.length
+    el_pos.value = pc + 1
+  }
+  
+  
+  function activate_selection(from, to) {
+    for(var i = from; i < to; i++) {
+      var item  = ordering[i]
+      active[item.key] = 0
+    }
+  }
+  
+  function activate_increment(increment) {
+    var from = pc
+    var to   = pc + increment
+
+    if(from >= ordering.length-1) // off-by-one
+      return false
+
+    if(to >= ordering.length)
+      to = ordering.length-1
+
+    activate_selection(from, to)
+
+    pc = to
+  }
+  
+  magic_gap = 20
+  magic_delta = 100
+  magic_square = 7
+  magic_row_width = 14
+  magic_row_height = 85
+  
+  function render_loop() {
+    activate_increment(magic_gap)
+    render_active()
+    render_display()
+    setTimeout(render_loop, magic_delta)
+  }
  
+  render_loop()
+  
+  window.addEventListener('message', receiveMessage, false)
+
+  el_gap.addEventListener('change', function(e) {
+    magic_gap = +e.target.value
+  })
+
+  el_pos.addEventListener('change', function(e) {
+    pc = +e.target.value
+  })
 </script>
 </body></html>

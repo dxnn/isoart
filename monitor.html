@@ -14,6 +14,7 @@
 </head><body>
 
 <div id="bottom">
+  <p id="filename"></p>
   Position: 
   1
   <input type="range" name="pos" value="1" min="1" id="pos">
@@ -23,7 +24,7 @@
 </div>
 
 <div><pre id="text">
-  Mouseover the columns
+  
 </pre></div>
 
 <script>
@@ -39,6 +40,7 @@
   var el_pos  = document.getElementById('pos')
   var el_size = document.getElementById('size')
   var el_text = document.getElementById('text')
+  var el_file = document.getElementById('filename')
 
   function receiveMessage(event) {
     var data = event.data
@@ -101,12 +103,13 @@
       var line = ly * magic_row_width + lx
       var nodes = file.nodes_by_line[line] || []
       
-      var text = filename + "\nLine:" + line + "\nNodes:\n  "
+      var text = "Line:" + line + "\nNodes:\n  "
       var node_text = nodes.map(function(n) {return n.name})
       
       el_text.textContent = text + node_text.join("\n  ")
+      el_file.textContent = "Filename: " + filename
     }
-               
+
     var mouseover = function(e) {
       eventId = canvas.addEventListener('mousemove', mousemove)
     }

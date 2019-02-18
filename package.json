@@ -1,0 +1,7 @@
+{
+  "name": "isoart",
+  "version": "0.1.0",
+  "dependencies": {
+    "fondue": "~0.6.1"
+  }
+}

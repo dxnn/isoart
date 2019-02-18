@@ -12,7 +12,7 @@
     height: 50px;
     width: 50px;
     position: absolute;
-    background-color: hsla(0, 100%, 100%, 0.8); 
+    background-color: hsla(0, 100%, 100%, 0.8);
   }
   #stack {
     position: absolute;
@@ -34,7 +34,7 @@
 </style>
 </head>
 <body>
-  
+
   <textarea id="program" contenteditable="true">
   255 jump exit   // loop sub 255 times
   dup dup         // copy loop index twice
@@ -48,92 +48,92 @@
   1 - >M          // put it back in memory at loop index minus one
   exit            // return from sub
   </textarea>
-  
+
   <div id="bottom"></div>
   <div id="pc"></div>
 
   <div id="stack"></div>
   <div id="rstack"></div>
-  
+
   <div id="legend">Press here to go: <button id="go">Go</button></div>
-  
+
   <script src="isoart.js"></script>
   <script src="renderer.js"></script>
-  
+
   <script id="pony" type="text/isoart">
-    149 163 169 173 179 173 174 177 169 155 138 124 158 182 180 176 
-    75 84 99 117 143 148 136 111 106 83 81 77 129 178 174 173 
-    78 79 84 100 129 140 146 98 115 77 115 84 121 176 172 171 
-    86 113 132 139 140 139 156 96 76 87 85 89 153 178 176 177 
-    97 135 139 119 146 175 193 94 106 127 74 116 182 178 171 176 
-    155 142 141 130 182 192 187 101 91 127 89 125 178 157 145 154 
-    106 124 110 86 173 107 176 95 128 133 83 101 147 140 141 140 
-    49 68 66 101 186 105 182 113 102 94 74 77 133 141 142 141 
-    58 58 59 103 189 199 200 155 136 131 106 94 142 146 142 141 
-    65 66 67 68 92 105 131 161 141 137 162 177 170 151 141 141 
-    72 73 75 76 77 76 109 176 140 164 208 212 190 167 151 139 
-    78 80 82 83 84 84 93 171 186 203 212 209 195 176 170 142 
-    98 88 88 89 85 79 77 105 150 199 198 193 177 168 174 145 
+    149 163 169 173 179 173 174 177 169 155 138 124 158 182 180 176
+    75 84 99 117 143 148 136 111 106 83 81 77 129 178 174 173
+    78 79 84 100 129 140 146 98 115 77 115 84 121 176 172 171
+    86 113 132 139 140 139 156 96 76 87 85 89 153 178 176 177
+    97 135 139 119 146 175 193 94 106 127 74 116 182 178 171 176
+    155 142 141 130 182 192 187 101 91 127 89 125 178 157 145 154
+    106 124 110 86 173 107 176 95 128 133 83 101 147 140 141 140
+    49 68 66 101 186 105 182 113 102 94 74 77 133 141 142 141
+    58 58 59 103 189 199 200 155 136 131 106 94 142 146 142 141
+    65 66 67 68 92 105 131 161 141 137 162 177 170 151 141 141
+    72 73 75 76 77 76 109 176 140 164 208 212 190 167 151 139
+    78 80 82 83 84 84 93 171 186 203 212 209 195 176 170 142
+    98 88 88 89 85 79 77 105 150 199 198 193 177 168 174 145
     131 135 117 126 100 78 79 79 82 113 110 103 95 127 180 166
   </script>
-  
+
   <script id="face" type="text/isoart">
-    70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70
-    70  0   0   30  30  0   0   0   0   0   0   30  30  0   0   70
-    70  0   0   30  30  30  30  0   0   0   30  30  0   30  0   70
-    70  0   0   30  30  30  30  30  0   0   30  30  30  30  0   70
-    70  0   0   30  30  30  30  30  30  30  30  30  0   30  0   70
-    70  0   0   0   30  30  30  30  30  30  30  30  0   0   0   70
-    70  0   0   0   0   0   30  30  30  30  30  30  30  30  30  70
-    70  0   0   0   0   0   30  30  30  30  30  30  0   30  0   70
-    70  0   0   0   0   0   0   0   30  30  30  30  0   30  0   70
-    70  0   0   0   0   0   0   0   30  30  30  30  0   0   0   70
-    70  0   0   0   0   0   0   30  30  30  30  0   0   0   0   70
-    70  0   0   0   0   0   30  30  30  30  30  0   0   0   0   70
-    70  0   0   0   0   30  0   0   30  30  30  0   0   0   0   70
-    70  0   0   30  30  0   0   0   30  30  0   0   0   0   0   70
-    70  0   0   0   0   0   0   0   30  0   0   0   0   0   0   70
-    70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70
+    70 70 70 70 70 70 70 70 70 70 70 70 70 70 70 70
+    70 0  30 30 30 30 0  0  0  30 0  0  0  30 0  70
+    70 0  30 0  0  0  0  0  0  30 0  0  0  30 0  70
+    70 0  30 0  0  0  0  0  0  30 0  0  0  30 0  70
+    70 0  30 0  0  0  0  0  0  30 0  0  0  30 0  70
+    70 0  30 30 30 30 0  0  0  30 30 30 30 0  0  70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 30 30 30 30 0  30 30 30 30 0  30 30 30 30 70
+    70 30 0  0  0  0  30 0  0  0  0  30 0  0  0  70
+    70 30 30 30 30 0  30 30 30 0  0  30 0  0  0  70
+    70 0  0  0  30 0  30 0  0  0  0  30 0  0  0  70
+    70 30 30 30 30 0  30 30 30 30 0  30 30 30 30 70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 70 70 70 70 70 70 70 70 70 70 70 70 70 70 70
   </script>
-  
+
 <script>
 
   // A program that manipulates an image (probably blur)
-  
+
   var el = document.getElementById.bind(document)
   var el_program = el('program')
   var el_memory  = el('face')
   var el_go      = el('go')
-  
+
   function parser(str) {
     return str.replace(/\/\/.*/g, '').split(/\s+/g).filter(function(x) {return x !== ''})
   }
-  
+
   var memory  = parser(el_memory.textContent)
   draw_memory(memory)
-  
+
   el_go.addEventListener('click', function() {
     var program = parser(el_program.value)
     run(program)
     draw_memory(memory)
   })
-  
+
   // el_program.addEventListener('DOMCharacterDataModified', dwrapper)
-  
-  
-  
+
+
+
   /*
   run(program)
   if(JSON.stringify(memory.slice(0, 11)) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
   if(JSON.stringify(stack)  != '[]') console.error('YO!')
-  
+
   if(JSON.stringify(compile(program)) != JSON.stringify(compile(compile(program)))) console.error('WOW!')
-  
+
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
-  
+
   */
-  
-  /* 
+
+  /*
     next steps:
     - show program next to memory with 'run' button
     - make it really greyscale
@@ -142,6 +142,6 @@
     -- run it on an actual image
     -- be cool, man, be cool
   */
-  
+
 </script>
 </body></html>

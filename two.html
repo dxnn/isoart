@@ -15,7 +15,7 @@
     height: 50px;
     width: 50px;
     position: absolute;
-    background-color: hsla(0, 100%, 100%, 0.8); 
+    background-color: hsla(0, 100%, 100%, 0.8);
   }
   #stack {
     position: absolute;
@@ -37,7 +37,7 @@
 </style>
 </head>
 <body>
-  
+
   <div id="vizprog"><pre><code>
   <span id="command-1">255</span> <span id="command-2">jump</span> <span id="command-3">exit</span>   // loop sub 255 times
   <span id="command-4">dup</span> <span id="command-5">dup</span>         // copy loop index twice
@@ -51,37 +51,56 @@
   <span id="command-21">1</span> <span id="command-22">-</span> <span id="command-23">>M</span>          // put it back in memory at loop index minus one
   <span id="command-24">exit</span>            // return from sub
   </code></pre></div>
-  
+
   <div id="bottom"></div>
   <div id="pc"></div>
 
   <div id="stack"></div>
   <div id="rstack"></div>
-  
+
   <div id="legend">Take a step: <button id="step">Step</button></div>
-  
+
   <script src="isoart.js"></script>
   <script src="renderer.js"></script>
-  
+
   <script id="face" type="text/isoart">
-    70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70
-    70  0   0   30  30  0   0   0   0   0   0   30  30  0   0   70
-    70  0   0   30  30  30  30  0   0   0   30  30  0   30  0   70
-    70  0   0   30  30  30  30  30  0   0   30  30  30  30  0   70
-    70  0   0   30  30  30  30  30  30  30  30  30  0   30  0   70
-    70  0   0   0   30  30  30  30  30  30  30  30  0   0   0   70
-    70  0   0   0   0   0   30  30  30  30  30  30  30  30  30  70
-    70  0   0   0   0   0   30  30  30  30  30  30  0   30  0   70
-    70  0   0   0   0   0   0   0   30  30  30  30  0   30  0   70
-    70  0   0   0   0   0   0   0   30  30  30  30  0   0   0   70
-    70  0   0   0   0   0   0   30  30  30  30  0   0   0   0   70
-    70  0   0   0   0   0   30  30  30  30  30  0   0   0   0   70
-    70  0   0   0   0   30  0   0   30  30  30  0   0   0   0   70
-    70  0   0   30  30  0   0   0   30  30  0   0   0   0   0   70
-    70  0   0   0   0   0   0   0   30  0   0   0   0   0   0   70
-    70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  210
+    70 70 70 70 70 70 70 70 70 70 70 70 70 70 70 70
+    70 0  30 30 30 30 0  0  0  30 0  0  0  30 0  70
+    70 0  30 0  0  0  0  0  0  30 0  0  0  30 0  70
+    70 0  30 0  0  0  0  0  0  30 0  0  0  30 0  70
+    70 0  30 0  0  0  0  0  0  30 0  0  0  30 0  70
+    70 0  30 30 30 30 0  0  0  30 30 30 30 0  0  70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 30 30 30 30 0  30 30 30 30 0  30 30 30 30 70
+    70 30 0  0  0  0  30 0  0  0  0  30 0  0  0  70
+    70 30 30 30 30 0  30 30 30 0  0  30 0  0  0  70
+    70 0  0  0  30 0  30 0  0  0  0  30 0  0  0  70
+    70 30 30 30 30 0  30 30 30 30 0  30 30 30 30 70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 0  0  0  0  0  0  0  0  0  0  0  0  0  0  70
+    70 70 70 70 70 70 70 70 70 70 70 70 70 70 70 70
   </script>
-  
+
+<!-- <script id="face" type="text/isoart"> -->
+<!-- 70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70 -->
+<!-- 70  0   0   30  30  0   0   0   0   0   0   30  30  0   0   70 -->
+<!-- 70  0   0   30  30  30  30  0   0   0   30  30  0   30  0   70 -->
+<!-- 70  0   0   30  30  30  30  30  0   0   30  30  30  30  0   70 -->
+<!-- 70  0   0   30  30  30  30  30  30  30  30  30  0   30  0   70 -->
+<!-- 70  0   0   0   30  30  30  30  30  30  30  30  0   0   0   70 -->
+<!-- 70  0   0   0   0   0   30  30  30  30  30  30  30  30  30  70 -->
+<!-- 70  0   0   0   0   0   30  30  30  30  30  30  0   30  0   70 -->
+<!-- 70  0   0   0   0   0   0   0   30  30  30  30  0   30  0   70 -->
+<!-- 70  0   0   0   0   0   0   0   30  30  30  30  0   0   0   70 -->
+<!-- 70  0   0   0   0   0   0   30  30  30  30  0   0   0   0   70 -->
+<!-- 70  0   0   0   0   0   30  30  30  30  30  0   0   0   0   70 -->
+<!-- 70  0   0   0   0   30  0   0   30  30  30  0   0   0   0   70 -->
+<!-- 70  0   0   30  30  0   0   0   30  30  0   0   0   0   0   70 -->
+<!-- 70  0   0   0   0   0   0   0   30  0   0   0   0   0   0   70 -->
+<!-- 70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  210 -->
+<!-- </script> -->
+
   <script id="program" type="text/isoart">
   255 jump exit   // loop sub 255 times
   dup dup         // copy loop index twice
@@ -95,39 +114,39 @@
   1 - >M          // put it back in memory at loop index minus one
   exit            // return from sub
   </script>
-  
-  
+
+
 <script>
 
   var el = document.getElementById.bind(document)
   var el_program = el('program')
   var el_memory  = el('face')
   var el_step    = el('step')
-  
+
   function parser(str) {
     return str.replace(/\/\/.*/g, '').split(/\s+/g).filter(function(x) {return x !== ''})
   }
-  
+
   reset()
   var program = parser(el_program.textContent)
   var memory  = parser(el_memory.textContent)
   codes = compile(program) // global ugh sorry
-    
+
   draw_memory(memory)
   draw_stacks()
-  
+
   function highlight(index) {
     var el_command = el('command-' + index)
     if(!el_command) return false
     el_command.classList.add('lit')
   }
-  
+
   function dehighlight(index) {
     var el_command = el('command-' + index)
     if(!el_command) return false
     el_command.classList.remove('lit')
   }
-  
+
   el_step.addEventListener('click', function() {
     dehighlight(pc+1)
     step(pc++)
@@ -135,22 +154,22 @@
     draw_stacks()
     highlight(pc+1)
   })
-  
+
   // el_program.addEventListener('DOMCharacterDataModified', dwrapper)
-  
-  
+
+
   /*
   run(program)
   if(JSON.stringify(memory.slice(0, 11)) != '[25,50,50,101,103,7,15,31,62,25,0]') console.error('QWERTY!')
   if(JSON.stringify(stack)  != '[]') console.error('YO!')
-  
+
   if(JSON.stringify(compile(program)) != JSON.stringify(compile(compile(program)))) console.error('WOW!')
-  
+
   if(JSON.stringify(decompile(compile(program))) != '[10,"jump","exit","dup","dup",1,"-","M>",1,"pick","M>","+",2,"/","dup",2,"roll",">M",1,"roll",1,"-",">M","exit"]') console.error('OOPS!')
-  
+
   */
-  
-  /* 
+
+  /*
     next steps:
     - show program next to memory with 'run' button
     - make it really greyscale
@@ -159,6 +178,6 @@
     -- run it on an actual image
     -- be cool, man, be cool
   */
-  
+
 </script>
 </body></html>
